@@ -105,8 +105,8 @@ APK 信息：
 
 | APK | 路径 | 包名 | versionName | 大小 | SHA256 |
 | --- | --- | --- | --- | ---: | --- |
-| 优化前 | `dist/mobile-histogram-baseline-coinstall-debug.apk` | `com.framia.mobilehistogram.baseline` | `0.1.0-baseline` | 26 KB | `0b277163a5b895ec599c46025791bb94891e3efc1dc1e3f537c7dd2c649a5fe6` |
-| 优化后 | `dist/mobile-histogram-optimized-coinstall-debug.apk` | `com.framia.mobilehistogram.optimized` | `0.1.0-optimized` | 26 KB | `547b7a0d456b02696629983bff704c6c23c6c2963ce185682a0d6b868d8580d6` |
+| 优化前 | `dist/mobile-histogram-baseline-coinstall-debug.apk` | `com.framia.mobilehistogram.baseline` | `0.1.0-baseline` | 45,816 bytes | `b91dbb24aaa1d0e4ab0056d8d5663edfdc858004264e03ac80e55f29a95ad2dc` |
+| 优化后 | `dist/mobile-histogram-optimized-coinstall-debug.apk` | `com.framia.mobilehistogram.optimized` | `0.1.0-optimized` | 45,812 bytes | `9b15c68ef0b5fb4780333b04745c5d1bb89623788baafb3f0ac53cb439d2bcf6` |
 
 APK 内包含：
 
@@ -130,6 +130,7 @@ optimized APK dex: file:///android_asset/index.html
 ```bash
 npm run test:baseline
 npm run harness:verify
+JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ANDROID_HOME="$HOME/Library/Android/sdk" ./gradlew assembleBaselineDebug assembleOptimizedDebug
 ```
 
 结果：
@@ -137,6 +138,7 @@ npm run harness:verify
 ```text
 Baseline histogram fixture passed.
 Harness verification passed.
+BUILD SUCCESSFUL
 ```
 
 ## 8. 视觉体验升级
@@ -145,7 +147,10 @@ Harness verification passed.
 
 - 新增 Android launcher 图标 `res/drawable/ic_launcher_histogram.xml`；
 - 优化前/优化后 APK 保持不同应用名和不同包名，可在同一手机并排安装；
-- H5 页面新增品牌头、模式标识、能力指标条、图片空状态和处理进度条；
+- H5 页面新增品牌头、模式标识、图片空状态、开屏直方图波动动画、全屏生成进度条、完成 toast 和处理终端；
+- H5 页面由单页瀑布改为 `接入 / 链路 / 输出 / 指标 / 协议 / 日志` 多视图跳转结构；
+- 指标和协议卡片补充小字注释，用于解释灰度桶、最大计数、像素总数、公式、通道、归一化和输出画布含义；
+- 移动端顶部增加 Android WebView 状态栏安全区，并压缩顶部控制台高度，避免状态栏遮挡首屏头部内容；
 - 优化前和优化后共享同一套视觉系统，但保留不同模式标签；
 - 图片处理流程增加载入、统计、完成的状态反馈。
 
