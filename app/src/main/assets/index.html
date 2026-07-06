@@ -7,6 +7,42 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div id="splashScreen" class="splash-screen" aria-label="启动动画">
+    <div class="splash-core">
+      <div class="splash-mark" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div class="splash-histogram" aria-hidden="true">
+        <span style="--level: 38%; --delay: 0ms;"></span>
+        <span style="--level: 62%; --delay: 45ms;"></span>
+        <span style="--level: 44%; --delay: 90ms;"></span>
+        <span style="--level: 78%; --delay: 135ms;"></span>
+        <span style="--level: 52%; --delay: 180ms;"></span>
+        <span style="--level: 88%; --delay: 225ms;"></span>
+        <span style="--level: 66%; --delay: 270ms;"></span>
+        <span style="--level: 96%; --delay: 315ms;"></span>
+        <span style="--level: 58%; --delay: 360ms;"></span>
+        <span style="--level: 84%; --delay: 405ms;"></span>
+        <span style="--level: 46%; --delay: 450ms;"></span>
+        <span style="--level: 72%; --delay: 495ms;"></span>
+        <span style="--level: 92%; --delay: 540ms;"></span>
+        <span style="--level: 54%; --delay: 585ms;"></span>
+        <span style="--level: 82%; --delay: 630ms;"></span>
+        <span style="--level: 48%; --delay: 675ms;"></span>
+        <span style="--level: 74%; --delay: 720ms;"></span>
+        <span style="--level: 60%; --delay: 765ms;"></span>
+        <span style="--level: 90%; --delay: 810ms;"></span>
+        <span style="--level: 56%; --delay: 855ms;"></span>
+        <span style="--level: 80%; --delay: 900ms;"></span>
+        <span style="--level: 42%; --delay: 945ms;"></span>
+        <span style="--level: 68%; --delay: 990ms;"></span>
+        <span style="--level: 50%; --delay: 1035ms;"></span>
+      </div>
+    </div>
+  </div>
+
   <main class="app-shell app-shell--optimized">
     <header class="topbar">
       <div class="brand-lockup">
@@ -16,41 +52,59 @@
           <span></span>
         </div>
         <div>
-          <p class="eyebrow">On-device Canvas Lab</p>
-          <h1>移动端图像直方图分析系统</h1>
+          <p class="eyebrow">Histogram Command System</p>
+          <h1>图像直方图工程控制台</h1>
         </div>
       </div>
       <div class="top-actions">
-        <span class="mode-chip mode-chip--optimized">优化后</span>
+        <span class="mode-chip mode-chip--optimized">优化后引擎</span>
         <label class="choose-button" for="imageInput">
           <span class="choose-icon" aria-hidden="true"></span>
-          <span>选择图片</span>
+          <span>接入图像</span>
         </label>
       </div>
       <input id="imageInput" type="file" accept="image/*">
     </header>
 
-    <section class="insight-strip" aria-label="应用能力概览">
-      <div>
-        <span>运行环境</span>
-        <strong>离线 WebView</strong>
-      </div>
-      <div>
-        <span>输出规格</span>
-        <strong>256 x 100</strong>
-      </div>
-      <div>
-        <span>灰度 bins</span>
-        <strong>256</strong>
-      </div>
-    </section>
+    <nav class="screen-tabs" aria-label="主要页面">
+      <button class="is-active" type="button" data-screen-target="screen-analyze">
+        <span class="tab-icon tab-icon--scan" aria-hidden="true"></span>
+        <span>接入</span>
+      </button>
+      <button type="button" data-screen-target="screen-pipeline">
+        <span class="tab-icon tab-icon--flow" aria-hidden="true"></span>
+        <span>链路</span>
+      </button>
+      <button type="button" data-screen-target="screen-result">
+        <span class="tab-icon tab-icon--chart" aria-hidden="true"></span>
+        <span>输出</span>
+      </button>
+      <button type="button" data-screen-target="screen-metrics">
+        <span class="tab-icon tab-icon--pulse" aria-hidden="true"></span>
+        <span>指标</span>
+      </button>
+      <button type="button" data-screen-target="screen-data">
+        <span class="tab-icon tab-icon--data" aria-hidden="true"></span>
+        <span>协议</span>
+      </button>
+      <button type="button" data-screen-target="screen-log">
+        <span class="tab-icon tab-icon--terminal" aria-hidden="true"></span>
+        <span>日志</span>
+      </button>
+    </nav>
 
-    <section class="workspace" aria-label="图像直方图分析工作区">
-      <div class="preview-pane">
+    <section id="screen-analyze" class="app-screen is-active" data-screen>
+      <div class="screen-heading">
+        <span>NODE 01 / IMAGE INTAKE</span>
+        <h2>本地图像接入</h2>
+        <p>选择图片后自动进入输出页，原图预览只保留在当前接入页。</p>
+      </div>
+
+      <section class="preview-pane module-panel module-panel--primary" aria-label="图像分析入口">
         <div class="pane-header">
           <div>
-            <p class="section-kicker">Input</p>
-            <h2>原图预览</h2>
+            <p class="section-kicker">Visual Input</p>
+            <h2>原图扫描舱</h2>
           </div>
           <span id="imageMeta">未选择图片</span>
         </div>
@@ -58,16 +112,61 @@
           <img id="previewImage" alt="已选择图片预览">
           <div id="previewPlaceholder" class="empty-state">
             <span class="empty-icon" aria-hidden="true"></span>
-            <p>选择一张本地图片后显示预览</p>
+            <p>等待接入本地图像</p>
           </div>
         </div>
+      </section>
+    </section>
+
+    <section id="screen-pipeline" class="app-screen" data-screen>
+      <div class="screen-heading">
+        <span>NODE 02 / PIPELINE</span>
+        <h2>处理链路拆分</h2>
+        <p>把答辩讲解链路从接入页拆出，单页只展示核心步骤。</p>
       </div>
 
-      <div class="result-pane">
+      <aside class="action-pane module-panel">
         <div class="pane-header">
           <div>
-            <p class="section-kicker">Result</p>
-            <h2>灰度直方图</h2>
+            <p class="section-kicker">Pipeline</p>
+            <h2>离线计算链路</h2>
+          </div>
+          <span>Armed</span>
+        </div>
+        <div class="timeline-list">
+          <div>
+            <span>01</span>
+            <strong>本地载入</strong>
+          </div>
+          <div>
+            <span>02</span>
+            <strong>像素矩阵读取</strong>
+          </div>
+          <div>
+            <span>03</span>
+            <strong>灰度统计</strong>
+          </div>
+          <div>
+            <span>04</span>
+            <strong>归一化绘制</strong>
+          </div>
+        </div>
+        <button class="ghost-link" type="button" data-screen-target="screen-data">查看工程协议</button>
+      </aside>
+    </section>
+
+    <section id="screen-result" class="app-screen" data-screen>
+      <div class="screen-heading screen-heading--compact">
+        <span>NODE 03 / HISTOGRAM MATRIX</span>
+        <h2>灰度分布矩阵输出</h2>
+        <p>这里只保留生成进度与 256x100 黑白直方图，统计项拆到指标页。</p>
+      </div>
+
+      <div class="result-pane module-panel module-panel--wide">
+        <div class="pane-header">
+          <div>
+            <p class="section-kicker">Output Matrix</p>
+            <h2>256 通道直方图</h2>
           </div>
           <span id="elapsedText">耗时 -- ms</span>
         </div>
@@ -83,24 +182,110 @@
         <div class="histogram-stage">
           <canvas id="histogramCanvas" width="256" height="100" aria-label="256x100 黑白直方图"></canvas>
         </div>
+      </div>
+    </section>
+
+    <section id="screen-metrics" class="app-screen" data-screen>
+      <div class="screen-heading">
+        <span>NODE 04 / METRICS</span>
+        <h2>结果指标</h2>
+        <p>生成耗时在输出页顶部展示，当前页只承载答辩需要解释的统计数字。</p>
+      </div>
+
+      <div class="metrics-pane module-panel">
+        <div class="pane-header">
+          <div>
+            <p class="section-kicker">Result Metrics</p>
+            <h2>统计快照</h2>
+          </div>
+          <span>Live</span>
+        </div>
         <div class="stats-grid" aria-label="统计结果">
           <div>
             <span>灰度 bins</span>
             <strong id="binCountText">256</strong>
+            <small>每个整数灰度值对应一个统计桶。</small>
           </div>
           <div>
             <span>最大计数</span>
             <strong id="maxCountText">--</strong>
+            <small>当前图片中出现次数最高的灰度桶。</small>
           </div>
           <div>
             <span>像素总数</span>
             <strong id="pixelCountText">--</strong>
+            <small>参与统计的图片宽高乘积。</small>
           </div>
         </div>
       </div>
     </section>
 
-    <p id="statusText" class="status" role="status" aria-live="polite">等待选择图片</p>
+    <section id="screen-data" class="app-screen" data-screen>
+      <div class="screen-heading">
+        <span>NODE 05 / COMPUTE PROTOCOL</span>
+        <h2>算法协议与验收参数</h2>
+        <p>保留最关键的验收参数，避免和输出、指标页重复。</p>
+      </div>
+
+      <div class="data-grid">
+        <article>
+          <span>Formula</span>
+          <strong>0.299R + 0.587G + 0.114B</strong>
+          <small>按课程要求将 RGB 转为灰度值。</small>
+        </article>
+        <article>
+          <span>Channels</span>
+          <strong>0 - 255</strong>
+          <small>灰度结果四舍五入后落入 256 个通道。</small>
+        </article>
+        <article>
+          <span>Scale</span>
+          <strong>0 - 100</strong>
+          <small>以当前最大计数为基准归一化高度。</small>
+        </article>
+        <article>
+          <span>Canvas</span>
+          <strong>256 x 100</strong>
+          <small>真实输出位图规格，页面只负责缩放展示。</small>
+        </article>
+      </div>
+    </section>
+
+    <section id="screen-log" class="app-screen" data-screen>
+      <div class="screen-heading">
+        <span>NODE 06 / PROCESS LOG</span>
+        <h2>实时处理终端</h2>
+        <p>所有图像接入、像素读取、灰度统计、归一化和渲染节点都会在这里留下日志。</p>
+      </div>
+
+      <section class="terminal-panel module-panel" aria-label="处理日志终端">
+        <div class="pane-header">
+          <div>
+            <p class="section-kicker">Process Terminal</p>
+            <h2>处理日志</h2>
+          </div>
+          <span>Live</span>
+        </div>
+        <div id="terminalLog" class="terminal-log" aria-live="polite">
+          <p><span>00:00:00</span> BOOT: optimized histogram engine initializing.</p>
+        </div>
+      </section>
+    </section>
+
+    <p id="statusText" class="status" role="status" aria-live="polite">等待图像接入</p>
+    <div id="processingOverlay" class="processing-overlay" role="status" aria-live="polite" hidden>
+      <div class="processing-overlay-core">
+        <span class="processing-overlay-kicker">PROCESSING MATRIX</span>
+        <div class="processing-overlay-copy">
+          <strong id="processingOverlayLabel">正在处理</strong>
+          <span id="processingOverlayPercent">0%</span>
+        </div>
+        <div class="processing-overlay-track" aria-hidden="true">
+          <span id="processingOverlayBar"></span>
+        </div>
+      </div>
+    </div>
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
     <canvas id="sourceCanvas" hidden></canvas>
   </main>

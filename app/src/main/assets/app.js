@@ -152,14 +152,162 @@
     elements.statusText.classList.toggle("is-success", kind === "success");
   }
 
+  function showToast(elements, message) {
+    if (!elements.toast) {
+      return;
+    }
+
+    if (elements.toastTimer) {
+      clearTimeout(elements.toastTimer);
+    }
+    elements.toast.textContent = message;
+    elements.toast.hidden = false;
+    elements.toast.classList.add("is-visible");
+    elements.toastTimer = setTimeout(function hideToast() {
+      elements.toast.classList.remove("is-visible");
+      elements.toastTimer = setTimeout(function removeToast() {
+        elements.toast.hidden = true;
+      }, 220);
+    }, 1800);
+  }
+
+  function terminalTime() {
+    var now = new Date();
+    return [
+      String(now.getHours()).padStart(2, "0"),
+      String(now.getMinutes()).padStart(2, "0"),
+      String(now.getSeconds()).padStart(2, "0")
+    ].join(":");
+  }
+
+  function appendLog(elements, message) {
+    if (!elements.terminalLog || !elements.terminalLog.ownerDocument) {
+      return;
+    }
+
+    var line = elements.terminalLog.ownerDocument.createElement("p");
+    var timestamp = elements.terminalLog.ownerDocument.createElement("span");
+    timestamp.textContent = terminalTime();
+    line.appendChild(timestamp);
+    line.appendChild(elements.terminalLog.ownerDocument.createTextNode(" " + message));
+    elements.terminalLog.appendChild(line);
+    elements.terminalLog.scrollTop = elements.terminalLog.scrollHeight;
+  }
+
+  function appendBootLogs(elements) {
+    appendLog(elements, "ENGINE: optimized typed-array pipeline online.");
+    appendLog(elements, "RUNTIME: offline H5 Canvas in Android WebView / browser preview, no remote assets required.");
+    appendLog(elements, "SPEC: grayscale formula round(0.299R + 0.587G + 0.114B), bins[0..255], output 256x100.");
+    appendLog(elements, "TIMER: elapsed time covers pixel read, grayscale, bin counting, normalization and rendering.");
+  }
+
+  function describeFile(file) {
+    return "FILE: name=\"" + file.name + "\", type=" + (file.type || "unknown") + ", size=" + Math.round(file.size / 1024) + " KB.";
+  }
+
+  function appendImageDecodedLogs(elements, image) {
+    var width = image.naturalWidth || image.width;
+    var height = image.naturalHeight || image.height;
+    var pixelCount = width * height;
+    appendLog(elements, "DECODE: image bitmap ready, dimensions=" + width + "x" + height + ", pixels=" + pixelCount + ".");
+    appendLog(elements, "CANVAS: source canvas resized to " + width + "x" + height + " before getImageData().");
+  }
+
+  function appendComputeStartLogs(elements) {
+    appendLog(elements, "READ: extracting RGBA buffer with willReadFrequently=true.");
+    appendLog(elements, "COMPUTE: single pass over RGBA data, step=4 bytes, writing Uint32Array(256).");
+    appendLog(elements, "NORMALIZE: each bin maps to round(count / maxCount * 100).");
+  }
+
+  function appendResultLogs(elements, result) {
+    appendLog(elements, "RESULT: maxBinCount=" + result.maxCount + ", pixelCount=" + result.pixelCount + ", elapsed=" + formatElapsed(result.elapsedMs) + " ms.");
+    appendLog(elements, "VERIFY: sum(bins) should match pixelCount; displayed binCount=" + HISTOGRAM_WIDTH + ".");
+    appendLog(elements, "RENDER: histogram canvas committed as " + HISTOGRAM_WIDTH + "x" + HISTOGRAM_HEIGHT + " black-white bitmap.");
+  }
+
   function setProcessing(elements, active, message, percent) {
     if (!elements.processingPanel || !elements.progressBar || !elements.processingLabel) {
       return;
     }
 
+    var nextPercent = clamp(percent || 0, 0, 100);
     elements.processingPanel.hidden = !active;
     elements.processingLabel.textContent = message || "正在处理";
-    elements.progressBar.style.width = clamp(percent || 0, 0, 100) + "%";
+    elements.progressBar.style.width = nextPercent + "%";
+
+    if (!elements.processingOverlay || !elements.processingOverlayBar || !elements.processingOverlayLabel || !elements.processingOverlayPercent) {
+      return;
+    }
+
+    if (elements.processingOverlayTimer) {
+      clearTimeout(elements.processingOverlayTimer);
+      elements.processingOverlayTimer = 0;
+    }
+
+    elements.processingOverlayLabel.textContent = message || "正在处理";
+    elements.processingOverlayPercent.textContent = Math.round(nextPercent) + "%";
+    elements.processingOverlayBar.style.width = nextPercent + "%";
+
+    if (active) {
+      elements.processingOverlay.hidden = false;
+      elements.processingOverlay.classList.remove("is-leaving");
+      elements.processingOverlay.classList.add("is-visible");
+      return;
+    }
+
+    elements.processingOverlay.classList.remove("is-visible");
+    elements.processingOverlay.classList.add("is-leaving");
+    elements.processingOverlayTimer = setTimeout(function hideProcessingOverlay() {
+      elements.processingOverlay.hidden = true;
+      elements.processingOverlay.classList.remove("is-leaving");
+      elements.processingOverlayBar.style.width = "0%";
+      elements.processingOverlayPercent.textContent = "0%";
+    }, 260);
+  }
+
+  function showScreen(elements, screenId) {
+    if (!elements.screens || !elements.screenTabs) {
+      return;
+    }
+
+    for (var index = 0; index < elements.screens.length; index += 1) {
+      var screen = elements.screens[index];
+      screen.classList.toggle("is-active", screen.id === screenId);
+    }
+
+    for (var tabIndex = 0; tabIndex < elements.screenTabs.length; tabIndex += 1) {
+      var tab = elements.screenTabs[tabIndex];
+      tab.classList.toggle("is-active", tab.getAttribute("data-screen-target") === screenId);
+    }
+  }
+
+  function bindNavigation(documentRef, elements) {
+    if (!documentRef.querySelectorAll) {
+      return;
+    }
+
+    elements.screens = documentRef.querySelectorAll("[data-screen]");
+    elements.screenTabs = documentRef.querySelectorAll(".screen-tabs [data-screen-target]");
+    var triggers = documentRef.querySelectorAll("[data-screen-target]");
+
+    for (var index = 0; index < triggers.length; index += 1) {
+      triggers[index].addEventListener("click", function onNavigate(event) {
+        showScreen(elements, event.currentTarget.getAttribute("data-screen-target"));
+      });
+    }
+  }
+
+  function runSplash(elements) {
+    if (!elements.splashScreen) {
+      return;
+    }
+
+    setTimeout(function leaveSplash() {
+      elements.splashScreen.classList.add("is-leaving");
+      setTimeout(function hideSplash() {
+        elements.splashScreen.hidden = true;
+      }, 280);
+    }, 1500);
   }
 
   function afterPaint(callback) {
@@ -206,18 +354,30 @@
       processingPanel: documentRef.getElementById("processingPanel"),
       processingLabel: documentRef.getElementById("processingLabel"),
       progressBar: documentRef.getElementById("progressBar"),
+      processingOverlay: documentRef.getElementById("processingOverlay"),
+      processingOverlayLabel: documentRef.getElementById("processingOverlayLabel"),
+      processingOverlayPercent: documentRef.getElementById("processingOverlayPercent"),
+      processingOverlayBar: documentRef.getElementById("processingOverlayBar"),
+      processingOverlayTimer: 0,
       elapsedText: documentRef.getElementById("elapsedText"),
       binCountText: documentRef.getElementById("binCountText"),
       maxCountText: documentRef.getElementById("maxCountText"),
       pixelCountText: documentRef.getElementById("pixelCountText"),
-      statusText: documentRef.getElementById("statusText")
+      statusText: documentRef.getElementById("statusText"),
+      terminalLog: documentRef.getElementById("terminalLog"),
+      splashScreen: documentRef.getElementById("splashScreen"),
+      toast: documentRef.getElementById("toast"),
+      toastTimer: 0
     };
 
     if (!elements.imageInput || !elements.histogramCanvas || !elements.sourceCanvas) {
       return;
     }
 
+    bindNavigation(documentRef, elements);
+    runSplash(elements);
     drawHistogram(elements.histogramCanvas, new Uint8Array(HISTOGRAM_WIDTH));
+    appendBootLogs(elements);
 
     var currentObjectUrl = "";
     elements.imageInput.addEventListener("change", function onImageSelected(event) {
@@ -225,14 +385,18 @@
 
       if (!file) {
         setStatus(elements, "未选择图片", "");
+        appendLog(elements, "未选择图像，流程保持待命。");
         return;
       }
       if (!file.type || file.type.indexOf("image/") !== 0) {
         setStatus(elements, "请选择图片文件", "error");
+        appendLog(elements, "拒绝输入：文件类型不是 image/*。");
         elements.imageInput.value = "";
         return;
       }
 
+      appendLog(elements, describeFile(file));
+      appendLog(elements, "QUEUE: accepted local image file, object URL decode requested.");
       setStatus(elements, "正在处理图片", "");
       setProcessing(elements, true, "正在载入图片", 24);
       loadImageFromFile(file)
@@ -244,10 +408,13 @@
           elements.previewImage.src = payload.objectUrl;
           elements.previewImage.classList.add("is-visible");
           elements.previewPlaceholder.hidden = true;
+          showScreen(elements, "screen-result");
 
+          appendImageDecodedLogs(elements, payload.image);
           setStatus(elements, "图片已载入，正在生成直方图", "");
           setProcessing(elements, true, "读取像素与统计 bins", 62);
           return afterPaint(function runHistogram() {
+            appendComputeStartLogs(elements);
             var result = generateHistogram(payload.image, elements.sourceCanvas, elements.histogramCanvas);
             return {
               result: result
@@ -262,13 +429,16 @@
           elements.maxCountText.textContent = String(result.maxCount);
           elements.pixelCountText.textContent = String(result.pixelCount);
           setProcessing(elements, true, "直方图生成完成", 100);
-          setStatus(elements, "直方图生成完成", "success");
+          setStatus(elements, "结果已更新，可继续选择图片", "success");
+          appendResultLogs(elements, result);
+          showToast(elements, "直方图生成完成");
           setTimeout(function hideProcessing() {
             setProcessing(elements, false, "", 0);
           }, 420);
         })
         .catch(function handleError(error) {
           setProcessing(elements, false, "", 0);
+          appendLog(elements, "处理失败：" + (error.message || "未知错误"));
           setStatus(elements, error.message || "图像处理失败，请重试", "error");
         })
         .finally(function resetInput() {
