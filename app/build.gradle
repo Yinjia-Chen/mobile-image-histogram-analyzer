@@ -12,6 +12,34 @@ android {
         versionName "0.1.0"
     }
 
+    buildFeatures {
+        buildConfig true
+    }
+
+    flavorDimensions "mode"
+
+    productFlavors {
+        baseline {
+            dimension "mode"
+            applicationIdSuffix ".baseline"
+            versionNameSuffix "-baseline"
+            manifestPlaceholders = [
+                    appLabel: "直方图分析-优化前"
+            ]
+            buildConfigField "String", "LOCAL_ENTRY_URL", "\"file:///android_asset/index-baseline.html\""
+        }
+
+        optimized {
+            dimension "mode"
+            applicationIdSuffix ".optimized"
+            versionNameSuffix "-optimized"
+            manifestPlaceholders = [
+                    appLabel: "直方图分析-优化后"
+            ]
+            buildConfigField "String", "LOCAL_ENTRY_URL", "\"file:///android_asset/index.html\""
+        }
+    }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17

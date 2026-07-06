@@ -3,7 +3,9 @@
 
     <application
         android:allowBackup="true"
-        android:label="@string/app_name"
+        android:icon="@drawable/ic_launcher_histogram"
+        android:label="${appLabel}"
+        android:roundIcon="@drawable/ic_launcher_histogram"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity

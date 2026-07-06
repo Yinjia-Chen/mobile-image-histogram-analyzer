@@ -8,6 +8,8 @@
     "harness:check-docs": "bash scripts/harness-check-docs.sh",
     "harness:verify": "bash scripts/harness-verify.sh",
     "test:histogram": "node scripts/test-histogram-algorithm.cjs && node scripts/test-histogram-main-flow.cjs",
-    "test:offline": "node scripts/test-offline-assets.cjs"
+    "test:baseline": "node scripts/test-histogram-baseline.cjs",
+    "test:offline": "node scripts/test-offline-assets.cjs",
+    "benchmark:histogram": "node scripts/benchmark-histogram-performance.cjs"
   }
 }

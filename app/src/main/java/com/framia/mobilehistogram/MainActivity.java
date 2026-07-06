@@ -12,7 +12,6 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
 public class MainActivity extends Activity {
-    private static final String LOCAL_ENTRY_URL = "file:///android_asset/index.html";
     private static final int FILE_CHOOSER_REQUEST_CODE = 1001;
 
     private WebView webView;
@@ -30,7 +29,7 @@ public class MainActivity extends Activity {
 
         configureWebView(webView);
         setContentView(webView);
-        webView.loadUrl(LOCAL_ENTRY_URL);
+        webView.loadUrl(BuildConfig.LOCAL_ENTRY_URL);
     }
 
     private void configureWebView(WebView view) {
