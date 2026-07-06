@@ -37,8 +37,8 @@
 | T-07 | 技术设计文档 | 研发设计 | `done` | T-06 | 明确 Android 壳层、H5 页面、算法函数、异常处理和测试建议 |
 | T-08 | PRD 评审记录 | 研发设计 | `done` | T-05 | 记录需求评审结论、主流程范围和后续优化边界 |
 | T-09 | 研发任务清单 | 协作管理 | `done` | T-05、T-06、T-07 | 已完成任务拆分，并在 `AGENTS.md` 与 harness 校验中约束后续状态更新 |
-| T-10 | Android 项目骨架搭建 | 主流程实现 | `todo` | T-07 | 创建可打开的 Android 工程，包含 MainActivity、Manifest 和基础资源目录 |
-| T-11 | WebView 本地页面加载 | 主流程实现 | `todo` | T-10 | APK 启动后可加载 `file:///android_asset/index.html`，断网可进入主界面 |
+| T-10 | Android 项目骨架搭建 | 主流程实现 | `done` | T-07 | 已创建 Android 工程骨架，包含 `MainActivity`、`AndroidManifest.xml`、资源目录和 Gradle 构建配置；`./gradlew --offline assembleDebug` 构建成功，证据见 `docs/测试/stage1-apk-build-evidence.md` |
+| T-11 | WebView 本地页面加载 | 主流程实现 | `done` | T-10 | `MainActivity` 加载 `file:///android_asset/index.html`，APK 内已打包 `assets/index.html`；debug APK 已输出到 `dist/mobile-histogram-stage1-debug.apk`，真机安装验证后续并入 T-21/T-24 |
 | T-12 | H5 页面基础结构 | 主流程实现 | `todo` | T-11 | 页面包含标题区、选图入口、预览区、直方图区、耗时与状态提示区 |
 | T-13 | 本地图片选择与预览 | 主流程实现 | `todo` | T-11、T-12 | 用户可选择单张本地图片，页面能显示原图预览 |
 | T-14 | Canvas 像素读取 | 主流程实现 | `todo` | T-13 | 将图片绘制到处理 Canvas，并读取真实 RGBA 像素数据 |
@@ -136,3 +136,4 @@
 | --- | --- |
 | 2026-07-06 | 新增研发任务清单，完成需求拆分，并将 T-09 标记为 `done`；后续完成或阻塞任务时必须同步更新本文件。 |
 | 2026-07-06 | 新增项目级自定义 subagents 配置任务 T-31，完成需求守门、移动壳、H5 算法、性能证据、验收测试、课程文档 6 个 agent 定义与调度说明。 |
+| 2026-07-06 | 完成第 1 阶段最小 Android WebView APK：T-10、T-11 标记为 `done`，debug APK 输出至 `dist/mobile-histogram-stage1-debug.apk`，构建证据记录于 `docs/测试/stage1-apk-build-evidence.md`。 |
