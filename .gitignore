@@ -1,0 +1,20 @@
+# macOS
+.DS_Store
+
+# Android / Gradle
+.gradle/
+build/
+app/build/
+local.properties
+*.iml
+
+# IDE
+.idea/
+
+# Generated packages
+*.apk
+*.aab
+
+# Course source documents
+*.docx
+~$*
