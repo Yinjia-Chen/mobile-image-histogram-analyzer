@@ -21,6 +21,8 @@
   var EXPORT_MAX_WIDTH = 1600;
   var EXPORT_MIN_WIDTH = 1024;
   var LONG_PRESS_MS = 650;
+  var PERFORMANCE_THRESHOLD_MS = 300;
+  var BASELINE_REFERENCE_MS = 407.1;
 
   function clamp(value, min, max) {
     return Math.min(max, Math.max(min, value));
@@ -127,6 +129,108 @@
     return context.getImageData(0, 0, width, height);
   }
 
+  function normalizedBinsInRange(normalizedBins) {
+    if (!normalizedBins || normalizedBins.length !== HISTOGRAM_WIDTH) {
+      return false;
+    }
+    for (var index = 0; index < normalizedBins.length; index += 1) {
+      if (normalizedBins[index] < 0 || normalizedBins[index] > HISTOGRAM_HEIGHT) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  function analyzeGrayDistribution(bins, pixelCount) {
+    var weightedTotal = 0;
+    var peakGray = 0;
+    var peakCount = 0;
+    var darkCount = 0;
+    var midCount = 0;
+    var brightCount = 0;
+
+    for (var gray = 0; gray < HISTOGRAM_WIDTH; gray += 1) {
+      var count = bins[gray] || 0;
+      weightedTotal += gray * count;
+      if (count > peakCount) {
+        peakCount = count;
+        peakGray = gray;
+      }
+      if (gray <= 63) {
+        darkCount += count;
+      } else if (gray <= 191) {
+        midCount += count;
+      } else {
+        brightCount += count;
+      }
+    }
+
+    var denominator = pixelCount || 1;
+    var darkRatio = darkCount / denominator;
+    var midRatio = midCount / denominator;
+    var brightRatio = brightCount / denominator;
+    var conclusion = "亮度分布较均衡";
+    if (darkRatio > 0.5) {
+      conclusion = "图片偏暗";
+    } else if (brightRatio > 0.5) {
+      conclusion = "图片偏亮";
+    } else if (midRatio > 0.5) {
+      conclusion = "灰度集中在中间调";
+    }
+
+    return {
+      averageGray: pixelCount > 0 ? weightedTotal / pixelCount : 0,
+      peakGray: peakGray,
+      darkRatio: darkRatio,
+      midRatio: midRatio,
+      brightRatio: brightRatio,
+      conclusion: conclusion
+    };
+  }
+
+  function createResultMetrics(result, histogramCanvas) {
+    var binsTotal = sumBins(result.bins);
+    var pixelProduct = result.width * result.height;
+    var performanceMargin = ((PERFORMANCE_THRESHOLD_MS - result.elapsedMs) / PERFORMANCE_THRESHOLD_MS) * 100;
+    var acceptance = {
+      binsLength: result.bins.length === HISTOGRAM_WIDTH,
+      binsSumMatchesPixelCount: binsTotal === result.pixelCount,
+      pixelCountMatchesDimensions: result.pixelCount === pixelProduct,
+      canvasSize: histogramCanvas.width === HISTOGRAM_WIDTH && histogramCanvas.height === HISTOGRAM_HEIGHT,
+      normalizedRange: normalizedBinsInRange(result.normalized),
+      elapsedUnderThreshold: result.elapsedMs < PERFORMANCE_THRESHOLD_MS
+    };
+    return {
+      acceptance: acceptance,
+      performance: {
+        thresholdMs: PERFORMANCE_THRESHOLD_MS,
+        elapsedMs: result.elapsedMs,
+        performanceMargin: performanceMargin,
+        status: result.elapsedMs < PERFORMANCE_THRESHOLD_MS ? "达标" : "未达标"
+      },
+      distribution: analyzeGrayDistribution(result.bins, result.pixelCount),
+      consistency: createConsistencyComparison(result, acceptance, BASELINE_REFERENCE_MS, result.elapsedMs)
+    };
+  }
+
+  function createConsistencyComparison(result, acceptance, baselineElapsedMs, currentElapsedMs) {
+    var binsTotal = sumBins(result.bins);
+    var checks = {
+      binsTotalConsistent: acceptance.binsLength && acceptance.binsSumMatchesPixelCount,
+      pixelCountConsistent: acceptance.pixelCountMatchesDimensions,
+      normalizedConsistent: acceptance.normalizedRange,
+      currentFaster: currentElapsedMs < baselineElapsedMs
+    };
+    return {
+      baselineElapsedMs: baselineElapsedMs,
+      currentElapsedMs: currentElapsedMs,
+      consistencyPassed: checks.binsTotalConsistent && checks.pixelCountConsistent && checks.normalizedConsistent,
+      checks: checks,
+      binsTotal: binsTotal,
+      pixelCount: result.pixelCount
+    };
+  }
+
   function generateHistogram(image, sourceCanvas, histogramCanvas, now) {
     var clock = now || (typeof performance !== "undefined" && performance.now
       ? performance.now.bind(performance)
@@ -138,7 +242,7 @@
     drawHistogram(histogramCanvas, normalized);
     var elapsedMs = clock() - start;
 
-    return {
+    var result = {
       bins: bins,
       normalized: normalized,
       elapsedMs: elapsedMs,
@@ -147,6 +251,8 @@
       maxCount: maxBinCount(bins),
       pixelCount: imageData.width * imageData.height
     };
+    result.metrics = createResultMetrics(result, histogramCanvas);
+    return result;
   }
 
   function setStatus(elements, message, kind) {
@@ -172,6 +278,61 @@
         elements.toast.hidden = true;
       }, 220);
     }, 1800);
+  }
+
+  function formatPercent(value) {
+    return (value * 100).toFixed(1) + "%";
+  }
+
+  function formatMargin(value) {
+    return value.toFixed(1) + "%";
+  }
+
+  function setCheckText(element, passed) {
+    if (!element) {
+      return;
+    }
+    element.textContent = passed ? "通过" : "未通过";
+    element.classList.toggle("is-pass", passed);
+    element.classList.toggle("is-fail", !passed);
+  }
+
+  function updateMetricsPanels(elements, result) {
+    if (!result.metrics) {
+      return;
+    }
+
+    var acceptance = result.metrics.acceptance;
+    setCheckText(elements.checkBinsText, acceptance.binsLength);
+    setCheckText(elements.checkSumText, acceptance.binsSumMatchesPixelCount);
+    setCheckText(elements.checkPixelsText, acceptance.pixelCountMatchesDimensions);
+    setCheckText(elements.checkCanvasText, acceptance.canvasSize);
+    setCheckText(elements.checkNormalizedText, acceptance.normalizedRange);
+    setCheckText(elements.checkElapsedText, acceptance.elapsedUnderThreshold);
+
+    var performance = result.metrics.performance;
+    elements.currentElapsedText.textContent = formatElapsed(performance.elapsedMs) + "ms";
+    elements.performanceMarginText.textContent = formatMargin(performance.performanceMargin);
+    elements.performanceStatusText.textContent = performance.status;
+    elements.performanceStatusText.classList.toggle("is-pass", performance.status === "达标");
+    elements.performanceStatusText.classList.toggle("is-fail", performance.status !== "达标");
+
+    var distribution = result.metrics.distribution;
+    elements.averageGrayText.textContent = distribution.averageGray.toFixed(1);
+    elements.peakGrayText.textContent = String(distribution.peakGray);
+    elements.darkRatioText.textContent = formatPercent(distribution.darkRatio);
+    elements.midRatioText.textContent = formatPercent(distribution.midRatio);
+    elements.brightRatioText.textContent = formatPercent(distribution.brightRatio);
+    elements.distributionConclusionText.textContent = distribution.conclusion;
+
+    var consistency = result.metrics.consistency;
+    elements.comparisonBaselineElapsedText.textContent = formatElapsed(consistency.baselineElapsedMs) + "ms";
+    elements.comparisonCurrentElapsedText.textContent = formatElapsed(consistency.currentElapsedMs) + "ms";
+    setCheckText(elements.comparisonStatusText, consistency.consistencyPassed);
+    setCheckText(elements.comparisonBinsText, consistency.checks.binsTotalConsistent);
+    setCheckText(elements.comparisonPixelsText, consistency.checks.pixelCountConsistent);
+    setCheckText(elements.comparisonNormalizedText, consistency.checks.normalizedConsistent);
+    setCheckText(elements.comparisonFasterText, consistency.checks.currentFaster);
   }
 
   function copyCanvas(sourceCanvas, targetCanvas) {
@@ -600,6 +761,28 @@
       binCountText: documentRef.getElementById("binCountText"),
       maxCountText: documentRef.getElementById("maxCountText"),
       pixelCountText: documentRef.getElementById("pixelCountText"),
+      checkBinsText: documentRef.getElementById("checkBinsText"),
+      checkSumText: documentRef.getElementById("checkSumText"),
+      checkPixelsText: documentRef.getElementById("checkPixelsText"),
+      checkCanvasText: documentRef.getElementById("checkCanvasText"),
+      checkNormalizedText: documentRef.getElementById("checkNormalizedText"),
+      checkElapsedText: documentRef.getElementById("checkElapsedText"),
+      currentElapsedText: documentRef.getElementById("currentElapsedText"),
+      performanceMarginText: documentRef.getElementById("performanceMarginText"),
+      performanceStatusText: documentRef.getElementById("performanceStatusText"),
+      averageGrayText: documentRef.getElementById("averageGrayText"),
+      peakGrayText: documentRef.getElementById("peakGrayText"),
+      darkRatioText: documentRef.getElementById("darkRatioText"),
+      midRatioText: documentRef.getElementById("midRatioText"),
+      brightRatioText: documentRef.getElementById("brightRatioText"),
+      distributionConclusionText: documentRef.getElementById("distributionConclusionText"),
+      comparisonBaselineElapsedText: documentRef.getElementById("comparisonBaselineElapsedText"),
+      comparisonCurrentElapsedText: documentRef.getElementById("comparisonCurrentElapsedText"),
+      comparisonStatusText: documentRef.getElementById("comparisonStatusText"),
+      comparisonBinsText: documentRef.getElementById("comparisonBinsText"),
+      comparisonPixelsText: documentRef.getElementById("comparisonPixelsText"),
+      comparisonNormalizedText: documentRef.getElementById("comparisonNormalizedText"),
+      comparisonFasterText: documentRef.getElementById("comparisonFasterText"),
       statusText: documentRef.getElementById("statusText"),
       terminalLog: documentRef.getElementById("terminalLog"),
       splashScreen: documentRef.getElementById("splashScreen"),
@@ -679,6 +862,7 @@
           elements.binCountText.textContent = String(HISTOGRAM_WIDTH);
           elements.maxCountText.textContent = String(result.maxCount);
           elements.pixelCountText.textContent = String(result.pixelCount);
+          updateMetricsPanels(elements, result);
           setProcessing(elements, true, "直方图生成完成", 100);
           setStatus(elements, "结果已更新，可继续选择图片", "success");
           appendResultLogs(elements, result);
@@ -706,6 +890,10 @@
     normalizeHistogram: normalizeHistogram,
     sumBins: sumBins,
     maxBinCount: maxBinCount,
+    normalizedBinsInRange: normalizedBinsInRange,
+    analyzeGrayDistribution: analyzeGrayDistribution,
+    createConsistencyComparison: createConsistencyComparison,
+    createResultMetrics: createResultMetrics,
     drawHistogram: drawHistogram,
     generateHistogram: generateHistogram,
     init: init

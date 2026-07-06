@@ -42,6 +42,23 @@ assertEqual(normalized.length, 256, "normalized histogram must contain 256 bins"
 assertArrayValue(normalized, 10, 50, "half of max count normalizes to 50");
 assertArrayValue(normalized, 20, 100, "max count normalizes to 100");
 assertArrayValue(normalized, 30, 0, "empty bins normalize to 0");
+assertEqual(histogram.normalizedBinsInRange(normalized), true, "normalized bins must pass the 0-100 range helper");
+
+const darkBins = new Uint32Array(256);
+darkBins[20] = 3;
+darkBins[180] = 1;
+const darkDistribution = histogram.analyzeGrayDistribution(darkBins, 4);
+assertEqual(darkDistribution.peakGray, 20, "peak gray reports the highest-count bin");
+assertEqual(darkDistribution.conclusion, "图片偏暗", "dark-heavy distribution uses the simple rule conclusion");
+
+const brightBins = new Uint32Array(256);
+brightBins[230] = 3;
+brightBins[80] = 1;
+assertEqual(
+  histogram.analyzeGrayDistribution(brightBins, 4).conclusion,
+  "图片偏亮",
+  "bright-heavy distribution uses the simple rule conclusion"
+);
 
 const drawCalls = [];
 const fakeCanvas = {

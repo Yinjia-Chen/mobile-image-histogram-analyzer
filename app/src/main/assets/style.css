@@ -1796,6 +1796,138 @@ h1 {
   font-size: clamp(20px, 5vw, 34px);
 }
 
+.metrics-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr);
+  gap: 12px;
+  padding: 0 14px 14px;
+}
+
+.metrics-detail-grid section {
+  min-width: 0;
+  border: 1px solid rgb(190 132 255 / 14%);
+  border-radius: 18px;
+  background: rgb(255 255 255 / 4%);
+  overflow: hidden;
+}
+
+.acceptance-panel {
+  grid-row: span 2;
+}
+
+.comparison-panel {
+  grid-column: 1 / -1;
+}
+
+.metrics-block-header {
+  display: grid;
+  gap: 5px;
+  padding: 14px;
+  border-bottom: 1px solid rgb(190 132 255 / 12%);
+}
+
+.metrics-block-header span {
+  color: #c7a7ff;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.metrics-block-header strong {
+  color: #fbf7ff;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.check-list {
+  display: grid;
+  gap: 0;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.check-list li,
+.performance-grid div,
+.distribution-grid div,
+.comparison-grid div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 38px;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgb(190 132 255 / 10%);
+}
+
+.check-list li:last-child,
+.performance-grid div:last-child,
+.distribution-grid div:last-child,
+.comparison-grid div:last-child {
+  border-bottom: 0;
+}
+
+.check-list span,
+.performance-grid span,
+.distribution-grid span,
+.comparison-grid span {
+  color: #a99fc1;
+  font-size: 12px;
+  font-weight: 760;
+  overflow-wrap: anywhere;
+}
+
+.check-list strong,
+.performance-grid strong,
+.distribution-grid strong,
+.comparison-grid strong {
+  color: #fbf7ff;
+  font-size: 13px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.check-list strong.is-pass,
+.performance-grid strong.is-pass,
+.comparison-grid strong.is-pass {
+  color: #9ffbd8;
+}
+
+.check-list strong.is-fail,
+.performance-grid strong.is-fail,
+.comparison-grid strong.is-fail {
+  color: #ff9edc;
+}
+
+.comparison-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.comparison-grid div {
+  min-height: 58px;
+  border-right: 1px solid rgb(190 132 255 / 10%);
+}
+
+.comparison-grid div:last-child {
+  border-right: 0;
+}
+
+.comparison-checks {
+  border-top: 1px solid rgb(190 132 255 / 12%);
+}
+
+.distribution-conclusion {
+  min-height: 44px;
+  padding: 12px 14px;
+  border-top: 1px solid rgb(190 132 255 / 12%);
+  color: #eadfff;
+  font-size: 13px;
+  font-weight: 820;
+  line-height: 1.45;
+}
+
 .data-grid {
   gap: 10px;
 }
@@ -2011,6 +2143,58 @@ h1 {
 
   .metrics-pane .stats-grid strong {
     font-size: clamp(18px, 6vw, 26px);
+  }
+
+  .metrics-detail-grid {
+    grid-template-columns: 1fr;
+    gap: 9px;
+    padding: 0 10px 10px;
+  }
+
+  .acceptance-panel {
+    grid-row: auto;
+  }
+
+  .comparison-panel {
+    grid-column: auto;
+  }
+
+  .metrics-block-header {
+    padding: 11px 12px;
+  }
+
+  .metrics-block-header strong {
+    font-size: 14px;
+  }
+
+  .check-list li,
+  .performance-grid div,
+  .distribution-grid div,
+  .comparison-grid div {
+    min-height: 34px;
+    padding: 8px 12px;
+  }
+
+  .check-list span,
+  .performance-grid span,
+  .distribution-grid span,
+  .comparison-grid span {
+    font-size: 11px;
+  }
+
+  .check-list strong,
+  .performance-grid strong,
+  .distribution-grid strong,
+  .comparison-grid strong {
+    font-size: 12px;
+  }
+
+  .comparison-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .comparison-grid div {
+    border-right: 0;
   }
 
   .terminal-log {

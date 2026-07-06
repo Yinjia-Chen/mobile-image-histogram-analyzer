@@ -191,7 +191,7 @@
       <div class="screen-heading">
         <span>NODE 04 / METRICS</span>
         <h2>结果指标</h2>
-        <p>生成耗时在输出页顶部展示，当前页只承载答辩需要解释的统计数字。</p>
+        <p>当前页展示统计快照、验收自检、性能余量和基于 bins 的规则解释。</p>
       </div>
 
       <div class="metrics-pane module-panel">
@@ -218,6 +218,65 @@
             <strong id="pixelCountText">--</strong>
             <small>参与统计的图片宽高乘积。</small>
           </div>
+        </div>
+        <div class="metrics-detail-grid">
+          <section class="acceptance-panel" aria-label="验收自检面板">
+            <div class="metrics-block-header">
+              <span>Acceptance Check</span>
+              <strong>验收自检</strong>
+            </div>
+            <ul class="check-list">
+              <li><span>灰度 bins = 256</span><strong id="checkBinsText">--</strong></li>
+              <li><span>sum(bins) = pixelCount</span><strong id="checkSumText">--</strong></li>
+              <li><span>pixelCount = width x height</span><strong id="checkPixelsText">--</strong></li>
+              <li><span>canvas = 256 x 100</span><strong id="checkCanvasText">--</strong></li>
+              <li><span>normalized in 0 - 100</span><strong id="checkNormalizedText">--</strong></li>
+              <li><span>elapsedMs &lt; 300ms</span><strong id="checkElapsedText">--</strong></li>
+            </ul>
+          </section>
+          <section class="performance-panel" aria-label="性能达标余量">
+            <div class="metrics-block-header">
+              <span>Performance Margin</span>
+              <strong>性能达标余量</strong>
+            </div>
+            <div class="performance-grid">
+              <div><span>课程阈值</span><strong>300ms</strong></div>
+              <div><span>当前耗时</span><strong id="currentElapsedText">--</strong></div>
+              <div><span>余量</span><strong id="performanceMarginText">--</strong></div>
+              <div><span>状态</span><strong id="performanceStatusText">--</strong></div>
+            </div>
+          </section>
+          <section class="distribution-panel" aria-label="灰度分布分析">
+            <div class="metrics-block-header">
+              <span>Gray Distribution</span>
+              <strong>灰度分布分析</strong>
+            </div>
+            <div class="distribution-grid">
+              <div><span>平均灰度</span><strong id="averageGrayText">--</strong></div>
+              <div><span>峰值灰度</span><strong id="peakGrayText">--</strong></div>
+              <div><span>暗部 0-63</span><strong id="darkRatioText">--</strong></div>
+              <div><span>中间调 64-191</span><strong id="midRatioText">--</strong></div>
+              <div><span>亮部 192-255</span><strong id="brightRatioText">--</strong></div>
+            </div>
+            <p id="distributionConclusionText" class="distribution-conclusion">等待结果生成</p>
+          </section>
+          <section class="comparison-panel" aria-label="结果一致性校验">
+            <div class="metrics-block-header">
+              <span>Comparison Evidence</span>
+              <strong>结果一致性校验</strong>
+            </div>
+            <div class="comparison-grid">
+              <div><span>低效压力对照</span><strong id="comparisonBaselineElapsedText">--</strong></div>
+              <div><span>当前实现</span><strong id="comparisonCurrentElapsedText">--</strong></div>
+              <div><span>结果一致性</span><strong id="comparisonStatusText">--</strong></div>
+            </div>
+            <ul class="check-list comparison-checks">
+              <li><span>两种实现输出的 bins 总数一致</span><strong id="comparisonBinsText">--</strong></li>
+              <li><span>像素总数一致</span><strong id="comparisonPixelsText">--</strong></li>
+              <li><span>归一化结果一致</span><strong id="comparisonNormalizedText">--</strong></li>
+              <li><span>当前实现耗时更低</span><strong id="comparisonFasterText">--</strong></li>
+            </ul>
+          </section>
         </div>
       </div>
     </section>

@@ -22,6 +22,30 @@ for (let index = 0; index < optimized.HISTOGRAM_WIDTH; index += 1) {
 
 const optimizedNormalized = optimized.normalizeHistogram(optimizedBins);
 const baselineNormalized = baseline.normalizeHistogramBaseline(baselineBins);
+const optimizedDistribution = optimized.analyzeGrayDistribution(optimizedBins, 4);
+const baselineDistribution = baseline.analyzeGrayDistribution(baselineBins, 4);
+
+assert.deepStrictEqual(
+  baselineDistribution,
+  optimizedDistribution,
+  "baseline distribution analysis must match optimized analysis for identical bins"
+);
+assert.strictEqual(baseline.normalizedBinsInRange(baselineNormalized), true, "baseline normalized bins stay in 0..100");
+
+const baselineConsistency = baseline.createConsistencyComparison(
+  { bins: baselineBins, pixelCount: 4 },
+  {
+    binsLength: true,
+    binsSumMatchesPixelCount: true,
+    pixelCountMatchesDimensions: true,
+    normalizedRange: true
+  },
+  407.1,
+  2.30
+);
+
+assert.strictEqual(baselineConsistency.consistencyPassed, true, "baseline comparison card passes identical-result checks");
+assert.strictEqual(baselineConsistency.checks.currentFaster, true, "comparison card confirms the optimized reference is faster");
 
 for (let index = 0; index < optimized.HISTOGRAM_WIDTH; index += 1) {
   assert.strictEqual(
