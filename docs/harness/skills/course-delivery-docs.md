@@ -28,6 +28,8 @@ testing material, or PPT content.
 - Separate core scope from optional extensions.
 - Tie tests to the course scoring points: accuracy, timing, stability, and
   explainability.
+- Keep `docs/研发/tasks-list.md` aligned when a document task is completed,
+  blocked, split, deferred, or newly discovered.
 
 ## Evidence Checklist
 
@@ -38,4 +40,3 @@ When writing docs, look for:
 - benchmark table rows;
 - known limitations;
 - team roles and deliverable ownership.
-

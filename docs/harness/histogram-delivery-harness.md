@@ -15,10 +15,12 @@ The harness treats each request as a handoff inside a course project team:
 ```text
 request
 -> work order
+-> task-list status check
 -> delivery lane
 -> selected project skills
 -> focused implementation or document work
 -> evidence collection
+-> task-list update when completed or blocked
 -> verification
 -> optional doc/report update
 ```
@@ -26,6 +28,10 @@ request
 The important artifact is the **work order**, not a generic task ticket. It
 tells an agent which team lane it is serving and what evidence is needed for
 course acceptance.
+
+The companion progress ledger is `docs/研发/tasks-list.md`. When work completes
+or becomes blocked, update the task list in the same turn so repository status
+stays aligned with actual project progress.
 
 ## Why This Project Needs Its Own Harness
 
@@ -49,6 +55,7 @@ mobile packaging, benchmark evidence, and document consistency**.
 - `.agent/routebook/task-types.json`: request-to-lane routing data.
 - `.agent/tmp/latest-request.md`: optional raw request input.
 - `.agent/tmp/current-work-order.md`: generated work order.
+- `docs/研发/tasks-list.md`: living task ledger for progress and blockers.
 - `docs/harness/skills/`: project-native skills.
 - `docs/harness/cases/`: reusable good and bad cases.
 - `scripts/harness-intake.mjs`: creates work orders.
@@ -115,4 +122,3 @@ claims. As `app/` and `web/` appear, extend the script with:
 - histogram algorithm fixture tests;
 - offline boundary checks;
 - benchmark evidence checks.
-

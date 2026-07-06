@@ -27,6 +27,7 @@ WebView shell plus H5 Canvas code to:
 Before non-trivial edits, read:
 
 - `README.md`
+- `docs/研发/tasks-list.md`
 - `docs/harness/histogram-delivery-harness.md`
 - `docs/harness/skills/index.md`
 - the current work order at `.agent/tmp/current-work-order.md` when it exists
@@ -53,6 +54,21 @@ Before editing, use the work order to identify:
 - files to inspect;
 - proof commands or evidence to collect;
 - scope boundaries.
+
+## Task List Discipline
+
+`docs/研发/tasks-list.md` is the project task ledger. Keep it aligned with real
+work status:
+
+- When a task is completed, update the matching task row to `done` and add a
+  short completion note or evidence reference.
+- When a task is blocked, update the matching task row to `blocked` and record
+  the blocker and expected next action.
+- When a task is newly discovered, split, merged, or deferred, update the task
+  list before finalizing the turn.
+- Do not mark app code, APK packaging, tests, optimization, or course materials
+  as `done` unless the repository contains the source, artifact, or evidence to
+  support that status.
 
 ## Delivery Lanes
 
@@ -110,4 +126,3 @@ report:
 - known limitations.
 
 Evidence belongs in docs or test reports, not only in chat.
-

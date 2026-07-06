@@ -7,6 +7,7 @@ required_files=(
   "package.json"
   ".agent/routebook/task-types.json"
   ".agent/tmp/.gitkeep"
+  "docs/研发/tasks-list.md"
   "docs/harness/histogram-delivery-harness.md"
   "docs/harness/skills/index.md"
   "docs/harness/skills/assignment-contract.md"
@@ -36,6 +37,7 @@ required_readme_terms=(
   "256x100"
   "300ms"
   "gray = red * 0.299 + green * 0.587 + blue * 0.114"
+  "tasks-list.md"
 )
 
 for term in "${required_readme_terms[@]}"; do
@@ -70,6 +72,8 @@ check_intake_lane() {
 
 check_intake_lane "准备做技术设计，放在 docs/研发/tech-design.md，主流程技术方案为主，性能优化不作为主要流程" "course_docs"
 check_intake_lane "同步其他文档状态，不要把性能优化作为主要流程点，性能优化后续单独文档推进" "course_docs"
+check_intake_lane "T-13 完成了，更新 tasks-list.md 的任务状态" "course_docs"
+check_intake_lane "T-20 被阻塞了，先同步任务清单里的 blocked 状态" "course_docs"
 check_intake_lane "优化直方图生成速度，准备 300ms 以内的测试证据和 benchmark 记录" "performance_evidence"
 check_intake_lane "实现灰度化公式和 256x100 直方图绘制" "histogram_algorithm"
 
