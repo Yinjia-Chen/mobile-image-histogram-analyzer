@@ -37,6 +37,7 @@ if [ -d "app" ]; then
   fi
 
   npm run test:histogram
+  npm run test:offline
 
   if [ "${RUN_ANDROID_BUILD_VERIFY:-}" = "1" ]; then
     if [ -z "${JAVA_HOME:-}" ] || [ -z "${ANDROID_HOME:-}" ]; then

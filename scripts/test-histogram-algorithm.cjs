@@ -90,4 +90,4 @@ assert.throws(
   "invalid RGBA data must be rejected"
 );
 
-console.log("Histogram algorithm fixtures passed.");
+console.log("Histogram algorithm fixture passed.");
