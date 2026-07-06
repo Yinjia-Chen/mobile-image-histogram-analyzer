@@ -1,36 +1,58 @@
-# Mobile Image Histogram Analyzer
+# 移动端图像直方图分析系统
 
-Android WebView + H5 Canvas mobile app for image histogram calculation and performance optimization.
+本项目是软件开发实践课程选题“图像直方图计算及性能优化”的实现仓库。系统采用 **Android WebView 壳 App + H5 Canvas** 的混合开发方式，最终打包为 Android APK，在手机本地完成图片灰度化、直方图统计、直方图绘制和耗时展示。
 
-## Project Decision
+## 项目决策
 
-- Topic: image histogram calculation and performance optimization.
-- App form: Android APK with a WebView shell.
-- Core implementation: HTML, CSS, JavaScript, and Canvas.
-- Backend: none.
-- Runtime mode: offline local image processing after installation.
+- 选题方向：图像直方图计算及性能优化。
+- 应用形态：Android APK。
+- 技术路线：Android WebView + HTML + CSS + JavaScript + Canvas。
+- 后端服务：无。
+- 运行方式：安装后可离线运行，图片处理全部在手机本地完成。
 
-## Core Features
+## 核心功能
 
-- Select a local image from the phone.
-- Preview the selected image.
-- Convert pixels to grayscale with:
+- 从手机本地选择图片。
+- 显示原图预览。
+- 按指定公式进行灰度化：
 
 ```text
 gray = red * 0.299 + green * 0.587 + blue * 0.114
 ```
 
-- Count grayscale values from 0 to 255.
-- Normalize counts to a 0-100 range.
-- Render a 256x100 black-and-white histogram.
-- Display histogram calculation time.
+- 统计 `0-255` 灰度值出现次数。
+- 将统计结果归一化到 `0-100`。
+- 绘制 `256x100` 黑白直方图。
+- 显示直方图生成耗时。
+- 对比基础实现和优化实现的性能表现。
 
-## Planned Deliverables
+## 技术特点
 
-- Android APK.
-- Android WebView shell source code.
-- H5 Canvas source code.
-- Requirements analysis.
-- Outline design.
-- Test plan and test report.
-- User guide.
+- 无需微信小程序账号。
+- 无需服务器部署。
+- 无需数据库。
+- 支持离线验收。
+- 图片不上传服务器，有利于保护用户隐私。
+- 核心算法集中在 H5 层，便于开发、测试和展示。
+
+## 计划目录
+
+```text
+.
+├── app/                  # Android WebView 壳 App
+├── docs/                 # 课程任务书、需求、设计、测试等文档
+├── web/                  # H5 Canvas 核心页面与脚本
+├── README.md
+└── .gitignore
+```
+
+## 计划提交物
+
+- Android APK 安装包。
+- Android WebView 壳源码。
+- H5 Canvas 核心源码。
+- 需求分析报告。
+- 概要设计文档。
+- 测试计划与测试报告。
+- 使用说明。
+- 项目答辩 PPT。
