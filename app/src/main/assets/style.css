@@ -7,6 +7,7 @@
 
 * {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 body {
@@ -22,6 +23,41 @@ body {
 button,
 input {
   font: inherit;
+}
+
+button,
+label,
+input,
+[data-screen-target] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+.choose-button,
+[data-screen-target] {
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+button:focus,
+input:focus,
+.choose-button:focus {
+  outline: none;
+}
+
+button:focus-visible,
+.choose-button:focus-visible {
+  outline: 2px solid rgb(159 251 216 / 64%);
+  outline-offset: 3px;
+}
+
+body.is-pointer-input button:focus,
+body.is-pointer-input input:focus,
+body.is-pointer-input .choose-button:focus,
+body.is-pointer-input button:focus-visible,
+body.is-pointer-input .choose-button:focus-visible {
+  outline: none;
 }
 
 .app-shell {
@@ -877,6 +913,17 @@ h2 {
   background-size: 18px 18px;
 }
 
+.histogram-zoom-trigger {
+  display: grid;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 18px;
+  background: transparent;
+  color: inherit;
+  cursor: zoom-in;
+}
+
 #histogramCanvas {
   width: min(100%, 580px);
   height: auto;
@@ -887,11 +934,187 @@ h2 {
   image-rendering: pixelated;
 }
 
+.histogram-zoom {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  padding: 24px;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, rgb(199 167 255 / 7%) 1px, transparent 1px),
+    linear-gradient(0deg, rgb(199 167 255 / 7%) 1px, transparent 1px),
+    radial-gradient(circle at 50% 50%, rgb(184 118 255 / 16%), transparent 42%),
+    #05050c;
+  background-size: 28px 28px, 28px 28px, auto, auto;
+}
+
+.histogram-zoom[hidden] {
+  display: none;
+}
+
+.histogram-zoom-close {
+  position: fixed;
+  top: max(14px, env(safe-area-inset-top));
+  right: max(14px, env(safe-area-inset-right));
+  z-index: 2;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 1px solid rgb(199 167 255 / 34%);
+  border-radius: 999px;
+  background: rgb(18 16 39 / 88%);
+  box-shadow: 0 18px 50px rgb(0 0 0 / 42%), inset 0 1px 0 rgb(255 255 255 / 10%);
+  color: #fbf7ff;
+  cursor: pointer;
+  font-size: 28px;
+  font-weight: 520;
+  line-height: 1;
+}
+
+.histogram-zoom-copy {
+  position: fixed;
+  top: max(18px, env(safe-area-inset-top));
+  left: max(18px, env(safe-area-inset-left));
+  z-index: 2;
+  display: grid;
+  gap: 5px;
+  pointer-events: none;
+}
+
+.histogram-zoom-copy span {
+  color: #c7a7ff;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.histogram-zoom-copy strong {
+  color: #fbf7ff;
+  font-size: 15px;
+  font-weight: 880;
+}
+
+.histogram-zoom-surface {
+  position: fixed;
+  inset: 0;
+  touch-action: manipulation;
+}
+
+#histogramZoomCanvas {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: min(92vw, calc(82vh * 2.56));
+  height: auto;
+  border: 1px solid rgb(199 167 255 / 42%);
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 34px 100px rgb(0 0 0 / 58%), 0 0 0 10px rgb(255 255 255 / 4%);
+  image-rendering: pixelated;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  transform: translate(-50%, -50%);
+  transform-origin: center center;
+}
+
+.save-confirm {
+  position: fixed;
+  inset: 0;
+  z-index: 130;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgb(5 5 12 / 62%);
+  backdrop-filter: blur(10px);
+}
+
+.save-confirm[hidden] {
+  display: none;
+}
+
+.save-confirm-panel {
+  display: grid;
+  gap: 12px;
+  width: min(380px, calc(100vw - 44px));
+  padding: 20px;
+  border: 1px solid rgb(199 167 255 / 34%);
+  border-radius: 22px;
+  background: rgb(18 16 39 / 96%);
+  box-shadow: 0 28px 82px rgb(0 0 0 / 56%), inset 0 1px 0 rgb(255 255 255 / 10%);
+}
+
+.save-confirm-panel span {
+  color: #c7a7ff;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.save-confirm-panel strong {
+  color: #fbf7ff;
+  font-size: 21px;
+  font-weight: 900;
+  line-height: 1.15;
+}
+
+.save-confirm-panel p {
+  color: #a99fc1;
+  font-size: 13px;
+  font-weight: 680;
+  line-height: 1.55;
+}
+
+.save-confirm-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.save-confirm-actions button {
+  min-height: 44px;
+  border-radius: 14px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 880;
+}
+
+.save-confirm-actions button:first-child {
+  border: 1px solid rgb(199 167 255 / 24%);
+  background: rgb(255 255 255 / 6%);
+  color: #d8cfff;
+}
+
+.save-confirm-actions button:last-child {
+  border: 1px solid rgb(199 167 255 / 44%);
+  background: linear-gradient(180deg, #b876ff, #6337d8);
+  color: #090713;
+}
+
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   border-top: 1px solid rgb(123 255 213 / 12%);
   background: rgb(255 255 255 / 3%);
+}
+
+@media (orientation: portrait) {
+  .histogram-zoom-copy {
+    top: max(14px, env(safe-area-inset-top));
+    left: max(14px, env(safe-area-inset-left));
+  }
+
+  .histogram-zoom-copy strong {
+    display: none;
+  }
+
+  #histogramZoomCanvas {
+    width: min(calc(100vh - 150px), 1280px);
+    max-width: none;
+    transform: translate(-50%, -50%) rotate(90deg);
+  }
 }
 
 .stats-grid div {

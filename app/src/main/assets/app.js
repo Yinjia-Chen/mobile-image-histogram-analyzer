@@ -18,6 +18,9 @@
 
   var HISTOGRAM_WIDTH = 256;
   var HISTOGRAM_HEIGHT = 100;
+  var EXPORT_MAX_WIDTH = 1600;
+  var EXPORT_MIN_WIDTH = 1024;
+  var LONG_PRESS_MS = 650;
 
   function clamp(value, min, max) {
     return Math.min(max, Math.max(min, value));
@@ -171,6 +174,219 @@
     }, 1800);
   }
 
+  function copyCanvas(sourceCanvas, targetCanvas) {
+    if (!sourceCanvas || !targetCanvas || !targetCanvas.getContext) {
+      return;
+    }
+
+    targetCanvas.width = HISTOGRAM_WIDTH;
+    targetCanvas.height = HISTOGRAM_HEIGHT;
+    var context = targetCanvas.getContext("2d");
+    context.clearRect(0, 0, HISTOGRAM_WIDTH, HISTOGRAM_HEIGHT);
+    context.drawImage(sourceCanvas, 0, 0, HISTOGRAM_WIDTH, HISTOGRAM_HEIGHT);
+  }
+
+  function buildCompositeCanvas(documentRef, image, histogramCanvas, result, modeLabel) {
+    if (!image || !histogramCanvas || !result) {
+      throw new Error("请先接入图片并生成直方图");
+    }
+
+    var imageWidth = image.naturalWidth || image.width;
+    var imageHeight = image.naturalHeight || image.height;
+    if (!imageWidth || !imageHeight) {
+      throw new Error("原图尺寸不可用，无法保存拼接图");
+    }
+
+    var outputWidth = clamp(Math.max(EXPORT_MIN_WIDTH, Math.min(imageWidth, EXPORT_MAX_WIDTH)), HISTOGRAM_WIDTH * 2, EXPORT_MAX_WIDTH);
+    var imageOutputHeight = Math.round((imageHeight / imageWidth) * outputWidth);
+    var separatorHeight = 72;
+    var histogramOutputHeight = Math.round((HISTOGRAM_HEIGHT / HISTOGRAM_WIDTH) * outputWidth);
+    var outputCanvas = documentRef.createElement("canvas");
+    outputCanvas.width = outputWidth;
+    outputCanvas.height = imageOutputHeight + separatorHeight + histogramOutputHeight;
+
+    var context = outputCanvas.getContext("2d");
+    context.fillStyle = "#f7f7f7";
+    context.fillRect(0, 0, outputCanvas.width, outputCanvas.height);
+    context.drawImage(image, 0, 0, outputWidth, imageOutputHeight);
+
+    var separatorY = imageOutputHeight;
+    context.fillStyle = "#05050c";
+    context.fillRect(0, separatorY, outputWidth, separatorHeight);
+    context.fillStyle = "#c7a7ff";
+    context.font = "600 " + Math.max(22, Math.round(outputWidth / 48)) + "px sans-serif";
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillText(
+      modeLabel + " | 原图 " + result.width + "x" + result.height + " | 直方图 256x100 | gray = 0.299R + 0.587G + 0.114B",
+      outputWidth / 2,
+      separatorY + separatorHeight / 2,
+      outputWidth - 48
+    );
+
+    context.imageSmoothingEnabled = false;
+    context.drawImage(histogramCanvas, 0, separatorY + separatorHeight, outputWidth, histogramOutputHeight);
+    return outputCanvas;
+  }
+
+  function saveCompositeImage(documentRef, elements) {
+    try {
+      var outputCanvas = buildCompositeCanvas(
+        documentRef,
+        elements.currentImage,
+        elements.histogramCanvas,
+        elements.currentResult,
+        "优化后直方图分析"
+      );
+      var dataUrl = outputCanvas.toDataURL("image/png");
+      var filename = "histogram-analysis-" + Date.now() + ".png";
+      var bridge = documentRef.defaultView && documentRef.defaultView.AndroidHistogramBridge;
+
+      if (bridge && bridge.saveCompositeImage) {
+        bridge.saveCompositeImage(dataUrl.replace(/^data:image\/png;base64,/, ""), filename);
+        showToast(elements, "拼接图已保存到图片库");
+        appendLog(elements, "EXPORT: composite image sent to Android gallery bridge.");
+        return;
+      }
+
+      var link = documentRef.createElement("a");
+      link.href = dataUrl;
+      link.download = filename;
+      link.rel = "noopener";
+      documentRef.body.appendChild(link);
+      link.click();
+      documentRef.body.removeChild(link);
+      showToast(elements, "拼接图已生成");
+      appendLog(elements, "EXPORT: composite image downloaded by browser fallback.");
+    } catch (error) {
+      showToast(elements, error.message || "拼接图保存失败");
+      appendLog(elements, "EXPORT failed: " + (error.message || "unknown error"));
+    }
+  }
+
+  function openHistogramZoom(elements) {
+    if (!elements.histogramZoom || !elements.histogramZoomCanvas) {
+      return;
+    }
+    if (!elements.currentResult) {
+      showToast(elements, "请先接入图片");
+      return;
+    }
+
+    copyCanvas(elements.histogramCanvas, elements.histogramZoomCanvas);
+    elements.histogramZoom.hidden = false;
+    elements.histogramZoom.classList.add("is-visible");
+  }
+
+  function closeHistogramZoom(elements) {
+    if (!elements.histogramZoom) {
+      return;
+    }
+    closeSaveConfirm(elements);
+    elements.histogramZoom.classList.remove("is-visible");
+    elements.histogramZoom.hidden = true;
+  }
+
+  function openSaveConfirm(elements) {
+    if (!elements.saveConfirmDialog) {
+      return false;
+    }
+    elements.saveConfirmDialog.hidden = false;
+    if (elements.saveConfirmAccept && elements.saveConfirmAccept.focus) {
+      elements.saveConfirmAccept.focus();
+    }
+    return true;
+  }
+
+  function closeSaveConfirm(elements) {
+    if (elements.saveConfirmDialog) {
+      elements.saveConfirmDialog.hidden = true;
+    }
+  }
+
+  function bindHistogramZoom(documentRef, elements) {
+    if (!elements.histogramZoomTrigger || !elements.histogramZoomSurface) {
+      return;
+    }
+
+    var longPressTimer = 0;
+    var longPressFired = false;
+
+    function clearLongPress() {
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        longPressTimer = 0;
+      }
+    }
+
+    elements.histogramZoomTrigger.addEventListener("click", function onHistogramClick() {
+      openHistogramZoom(elements);
+    });
+
+    if (elements.histogramZoomClose) {
+      elements.histogramZoomClose.addEventListener("click", function onClose() {
+        closeHistogramZoom(elements);
+      });
+    }
+
+    elements.histogramZoomSurface.addEventListener("pointerdown", function onPressStart(event) {
+      longPressFired = false;
+      clearLongPress();
+      longPressTimer = setTimeout(function onLongPress() {
+        longPressFired = true;
+        if (!openSaveConfirm(elements)) {
+          saveCompositeImage(documentRef, elements);
+        }
+      }, LONG_PRESS_MS);
+      if (event.pointerType === "touch") {
+        event.preventDefault();
+      }
+    });
+
+    elements.histogramZoomSurface.addEventListener("pointerup", function onPressEnd(event) {
+      clearLongPress();
+      if (longPressFired) {
+        event.preventDefault();
+      }
+    });
+    elements.histogramZoomSurface.addEventListener("pointercancel", clearLongPress);
+    elements.histogramZoomSurface.addEventListener("pointerleave", clearLongPress);
+    elements.histogramZoomSurface.addEventListener("contextmenu", function onContextMenu(event) {
+      event.preventDefault();
+    });
+
+    if (elements.saveConfirmCancel) {
+      elements.saveConfirmCancel.addEventListener("click", function onSaveCancel() {
+        closeSaveConfirm(elements);
+      });
+    }
+
+    if (elements.saveConfirmAccept) {
+      elements.saveConfirmAccept.addEventListener("click", function onSaveAccept() {
+        closeSaveConfirm(elements);
+        saveCompositeImage(documentRef, elements);
+      });
+    }
+
+    if (elements.saveConfirmDialog) {
+      elements.saveConfirmDialog.addEventListener("click", function onConfirmBackdrop(event) {
+        if (event.target === elements.saveConfirmDialog) {
+          closeSaveConfirm(elements);
+        }
+      });
+    }
+
+    documentRef.addEventListener("keydown", function onZoomKeydown(event) {
+      if (event.key === "Escape") {
+        if (elements.saveConfirmDialog && !elements.saveConfirmDialog.hidden) {
+          closeSaveConfirm(elements);
+          return;
+        }
+        closeHistogramZoom(elements);
+      }
+    });
+  }
+
   function terminalTime() {
     var now = new Date();
     return [
@@ -263,6 +479,27 @@
       elements.processingOverlayBar.style.width = "0%";
       elements.processingOverlayPercent.textContent = "0%";
     }, 260);
+  }
+
+  function bindInputModality(documentRef) {
+    if (!documentRef.addEventListener || !documentRef.body) {
+      return;
+    }
+
+    function usePointerInput() {
+      documentRef.body.classList.add("is-pointer-input");
+    }
+
+    function useKeyboardInput(event) {
+      if (event.key === "Tab") {
+        documentRef.body.classList.remove("is-pointer-input");
+      }
+    }
+
+    documentRef.addEventListener("pointerdown", usePointerInput, true);
+    documentRef.addEventListener("touchstart", usePointerInput, true);
+    documentRef.addEventListener("mousedown", usePointerInput, true);
+    documentRef.addEventListener("keydown", useKeyboardInput, true);
   }
 
   function showScreen(elements, screenId) {
@@ -367,14 +604,26 @@
       terminalLog: documentRef.getElementById("terminalLog"),
       splashScreen: documentRef.getElementById("splashScreen"),
       toast: documentRef.getElementById("toast"),
-      toastTimer: 0
+      toastTimer: 0,
+      histogramZoomTrigger: documentRef.querySelector(".histogram-zoom-trigger"),
+      histogramZoom: documentRef.getElementById("histogramZoom"),
+      histogramZoomClose: documentRef.getElementById("histogramZoomClose"),
+      histogramZoomSurface: documentRef.getElementById("histogramZoomSurface"),
+      histogramZoomCanvas: documentRef.getElementById("histogramZoomCanvas"),
+      saveConfirmDialog: documentRef.getElementById("saveConfirmDialog"),
+      saveConfirmCancel: documentRef.getElementById("saveConfirmCancel"),
+      saveConfirmAccept: documentRef.getElementById("saveConfirmAccept"),
+      currentImage: null,
+      currentResult: null
     };
 
     if (!elements.imageInput || !elements.histogramCanvas || !elements.sourceCanvas) {
       return;
     }
 
+    bindInputModality(documentRef);
     bindNavigation(documentRef, elements);
+    bindHistogramZoom(documentRef, elements);
     runSplash(elements);
     drawHistogram(elements.histogramCanvas, new Uint8Array(HISTOGRAM_WIDTH));
     appendBootLogs(elements);
@@ -405,6 +654,7 @@
             URL.revokeObjectURL(currentObjectUrl);
           }
           currentObjectUrl = payload.objectUrl;
+          elements.currentImage = payload.image;
           elements.previewImage.src = payload.objectUrl;
           elements.previewImage.classList.add("is-visible");
           elements.previewPlaceholder.hidden = true;
@@ -423,6 +673,7 @@
         })
         .then(function handleResult(payload) {
           var result = payload.result;
+          elements.currentResult = result;
           elements.imageMeta.textContent = result.width + " x " + result.height;
           elements.elapsedText.textContent = "耗时 " + formatElapsed(result.elapsedMs) + " ms";
           elements.binCountText.textContent = String(HISTOGRAM_WIDTH);

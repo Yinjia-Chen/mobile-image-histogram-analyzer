@@ -180,7 +180,9 @@
           </div>
         </div>
         <div class="histogram-stage">
-          <canvas id="histogramCanvas" width="256" height="100" aria-label="256x100 黑白直方图"></canvas>
+          <button class="histogram-zoom-trigger" type="button" aria-label="放大查看 Baseline 256x100 黑白直方图">
+            <canvas id="histogramCanvas" width="256" height="100" aria-label="256x100 黑白直方图"></canvas>
+          </button>
         </div>
       </div>
     </section>
@@ -286,6 +288,27 @@
       </div>
     </div>
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+    <div id="histogramZoom" class="histogram-zoom" role="dialog" aria-modal="true" aria-label="横向放大查看直方图" hidden>
+      <button id="histogramZoomClose" class="histogram-zoom-close" type="button" aria-label="关闭放大查看">×</button>
+      <div class="histogram-zoom-copy">
+        <span>BASELINE MATRIX / 256 x 100</span>
+        <strong>原图 / 直方图拼接输出</strong>
+      </div>
+      <div id="histogramZoomSurface" class="histogram-zoom-surface">
+        <canvas id="histogramZoomCanvas" width="256" height="100" aria-label="放大的 256x100 黑白直方图"></canvas>
+      </div>
+    </div>
+    <div id="saveConfirmDialog" class="save-confirm" role="dialog" aria-modal="true" aria-labelledby="saveConfirmTitle" hidden>
+      <div class="save-confirm-panel">
+        <span>EXPORT PERMISSION</span>
+        <strong id="saveConfirmTitle">保存拼接结果图</strong>
+        <p>将生成并保存一张包含原图、说明文本和直方图结果的 PNG 图片。</p>
+        <div class="save-confirm-actions">
+          <button id="saveConfirmCancel" type="button">取消</button>
+          <button id="saveConfirmAccept" type="button">确认保存</button>
+        </div>
+      </div>
+    </div>
 
     <canvas id="sourceCanvas" hidden></canvas>
   </main>
