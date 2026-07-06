@@ -6,7 +6,7 @@
   "scripts": {
     "harness:intake": "node scripts/harness-intake.mjs",
     "harness:check-docs": "bash scripts/harness-check-docs.sh",
-    "harness:verify": "bash scripts/harness-verify.sh"
+    "harness:verify": "bash scripts/harness-verify.sh",
+    "test:histogram": "node scripts/test-histogram-algorithm.cjs"
   }
 }
-
