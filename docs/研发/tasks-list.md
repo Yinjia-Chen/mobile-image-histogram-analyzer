@@ -39,17 +39,17 @@
 | T-09 | 研发任务清单 | 协作管理 | `done` | T-05、T-06、T-07 | 已完成任务拆分，并在 `AGENTS.md` 与 harness 校验中约束后续状态更新 |
 | T-10 | Android 项目骨架搭建 | 主流程实现 | `done` | T-07 | 已创建 Android 工程骨架，包含 `MainActivity`、`AndroidManifest.xml`、资源目录和 Gradle 构建配置；`./gradlew --offline assembleDebug` 构建成功，证据见 `docs/测试/stage1-apk-build-evidence.md` |
 | T-11 | WebView 本地页面加载 | 主流程实现 | `done` | T-10 | `MainActivity` 加载 `file:///android_asset/index.html`，APK 内已打包 `assets/index.html`；debug APK 已输出到 `dist/mobile-histogram-stage1-debug.apk`，真机安装验证后续并入 T-21/T-24 |
-| T-12 | H5 页面基础结构 | 主流程实现 | `todo` | T-11 | 页面包含标题区、选图入口、预览区、直方图区、耗时与状态提示区 |
-| T-13 | 本地图片选择与预览 | 主流程实现 | `todo` | T-11、T-12 | 用户可选择单张本地图片，页面能显示原图预览 |
-| T-14 | Canvas 像素读取 | 主流程实现 | `todo` | T-13 | 将图片绘制到处理 Canvas，并读取真实 RGBA 像素数据 |
-| T-15 | 灰度化计算 | 主流程实现 | `todo` | T-14 | 使用 `gray = red * 0.299 + green * 0.587 + blue * 0.114` 计算灰度 bin |
-| T-16 | 256 bin 直方图统计 | 主流程实现 | `todo` | T-15 | 统计数组长度为 256，每个有效像素参与统计 |
-| T-17 | 0-100 归一化 | 主流程实现 | `todo` | T-16 | 按最大计数将 256 个 bin 映射到 `0-100` 高度范围 |
-| T-18 | 256x100 黑白直方图绘制 | 主流程实现 | `todo` | T-17 | Canvas 输出语义为 `256x100`，每列对应一个灰度值 |
-| T-19 | 生成耗时展示 | 主流程实现 | `todo` | T-14、T-18 | 页面展示本次处理耗时，计时范围覆盖主流程处理步骤 |
-| T-20 | 异常提示与重新选择 | 主流程实现 | `todo` | T-13、T-18 | 选择取消、读取失败、空结果等场景不崩溃，并可重新选择图片 |
+| T-12 | H5 页面基础结构 | 主流程实现 | `done` | T-11 | 已完成页面结构，包含选图入口、预览区、直方图区、耗时、状态和统计信息区域；证据见 `docs/测试/stage2-histogram-main-flow-evidence.md` |
+| T-13 | 本地图片选择与预览 | 主流程实现 | `done` | T-11、T-12 | 已实现 H5 `image/*` 文件选择和 Android WebView 文件选择回调，选图后显示原图预览；真机验收并入 T-21/T-24 |
+| T-14 | Canvas 像素读取 | 主流程实现 | `done` | T-13 | 已将图片按原始尺寸绘制到隐藏处理 Canvas，并通过 `getImageData` 读取 RGBA 像素数据 |
+| T-15 | 灰度化计算 | 主流程实现 | `done` | T-14 | 已使用 `gray = red * 0.299 + green * 0.587 + blue * 0.114` 和 `Math.round` 取整规则计算灰度 bin，并通过 fixture 测试 |
+| T-16 | 256 bin 直方图统计 | 主流程实现 | `done` | T-15 | 已使用长度为 256 的 `Uint32Array` 统计所有像素，fixture 验证总计数等于像素数 |
+| T-17 | 0-100 归一化 | 主流程实现 | `done` | T-16 | 已按最大计数归一化到 `0-100`，fixture 验证最大计数为 100、半数为 50 |
+| T-18 | 256x100 黑白直方图绘制 | 主流程实现 | `done` | T-17 | 已固定直方图 Canvas 源尺寸为 `256x100` 并逐列绘制黑白结果，fixture 验证绘制尺寸和底部向上绘制规则 |
+| T-19 | 生成耗时展示 | 主流程实现 | `done` | T-14、T-18 | 已展示本次处理耗时，计时范围覆盖 Canvas 绘制、像素读取、灰度统计、归一化和直方图绘制 |
+| T-20 | 异常提示与重新选择 | 主流程实现 | `done` | T-13、T-18 | 已处理取消选择、非图片文件、图片读取失败和处理失败提示，并在每次选择后允许重新选择 |
 | T-21 | 主流程离线自测 | 测试验收 | `todo` | T-10 至 T-20 | 断网状态下完成启动、选图、预览、生成直方图和显示耗时 |
-| T-22 | 算法准确性测试 | 测试验收 | `todo` | T-15 至 T-18 | 使用可解释样例或固定图片验证灰度统计、归一化和绘制结果 |
+| T-22 | 算法准确性测试 | 测试验收 | `done` | T-15 至 T-18 | 已新增 `scripts/test-histogram-algorithm.cjs`，覆盖灰度公式、256 bin 总数、归一化和 `256x100` 绘制规则；`npm run test:histogram` 通过 |
 | T-23 | 基础耗时记录 | 测试验收 | `todo` | T-19、T-21 | 记录测试设备、图片尺寸、处理耗时和已知限制 |
 | T-24 | APK 打包与安装验证 | 测试验收 | `todo` | T-21 | 生成可安装 APK，并在 Android 手机或模拟器完成安装启动验证 |
 | T-25 | 测试计划与测试报告 | 文档产物 | `todo` | T-21、T-22、T-23、T-24 | 输出测试范围、测试用例、执行结果、问题记录和结论 |
@@ -137,3 +137,4 @@
 | 2026-07-06 | 新增研发任务清单，完成需求拆分，并将 T-09 标记为 `done`；后续完成或阻塞任务时必须同步更新本文件。 |
 | 2026-07-06 | 新增项目级自定义 subagents 配置任务 T-31，完成需求守门、移动壳、H5 算法、性能证据、验收测试、课程文档 6 个 agent 定义与调度说明。 |
 | 2026-07-06 | 完成第 1 阶段最小 Android WebView APK：T-10、T-11 标记为 `done`，debug APK 输出至 `dist/mobile-histogram-stage1-debug.apk`，构建证据记录于 `docs/测试/stage1-apk-build-evidence.md`。 |
+| 2026-07-06 | 完成第 2 阶段 H5 直方图主流程：T-12 至 T-20、T-22 标记为 `done`，debug APK 输出至 `dist/mobile-histogram-stage2-debug.apk`，证据记录于 `docs/测试/stage2-histogram-main-flow-evidence.md`。 |
