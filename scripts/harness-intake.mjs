@@ -14,14 +14,19 @@ function fail(message) {
 }
 
 function parseArgs(argv) {
-  const args = { text: null };
+  const args = { text: null, dryRun: false, expectLane: null };
   for (let index = 0; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === '--text') {
       args.text = argv[index + 1] || '';
       index += 1;
+    } else if (arg === '--dry-run') {
+      args.dryRun = true;
+    } else if (arg === '--expect-lane') {
+      args.expectLane = argv[index + 1] || '';
+      index += 1;
     } else if (arg === '--help' || arg === '-h') {
-      console.log('Usage: npm run harness:intake -- --text "<request>"');
+      console.log('Usage: npm run harness:intake -- --text "<request>" [--dry-run] [--expect-lane <lane>]');
       process.exit(0);
     } else {
       fail(`Unknown argument: ${arg}`);
@@ -73,6 +78,49 @@ function includesSignal(text, signal) {
   return text.toLowerCase().includes(String(signal).toLowerCase());
 }
 
+function containsAny(text, signals) {
+  return signals.some((signal) => includesSignal(text, signal));
+}
+
+function isScopedPerformanceQualifier(request) {
+  const compact = request.replace(/\s+/g, '');
+  const scopedPatterns = [
+    /性能优化.{0,12}(不作为|不是|不纳入|后续|单独|不用|不要|不写得太先进)/,
+    /(不作为|不是|不纳入|后续|单独|不用|不要|不写得太先进).{0,12}性能优化/,
+    /性能.{0,8}(不作为|不是|不纳入|后续|单独|不用|不要|不写得太先进)/,
+    /(不作为|不是|不纳入|后续|单独|不用|不要|不写得太先进).{0,8}性能/,
+    /优化.{0,8}(不作为|不是|不纳入|后续|单独|不用|不要|不写得太先进)/,
+    /(不作为|不是|不纳入|后续|单独|不用|不要|不写得太先进).{0,8}优化/,
+  ];
+  return scopedPatterns.some((pattern) => pattern.test(compact));
+}
+
+function hasDocumentIntent(request) {
+  return containsAny(request, [
+    '文档',
+    '报告',
+    '需求分析',
+    '概要设计',
+    '技术设计',
+    '设计文档',
+    'README',
+    'markdown',
+    '.md',
+    'md格式',
+    'docs/',
+    '同步',
+    '口径',
+    '状态',
+  ]);
+}
+
+function intakeContext(request) {
+  return {
+    documentIntent: hasDocumentIntent(request),
+    scopedPerformanceQualifier: isScopedPerformanceQualifier(request),
+  };
+}
+
 function scoreLane(request, files, lane) {
   const requestMatches = (lane.signals || []).filter((signal) => includesSignal(request, signal));
   const fileMatches = (lane.fileSignals || []).filter((signal) =>
@@ -85,10 +133,32 @@ function scoreLane(request, files, lane) {
   };
 }
 
+function adjustLaneScore(name, score, context) {
+  const adjusted = { ...score, notes: [] };
+
+  if (name === 'performance_evidence' && context.documentIntent && context.scopedPerformanceQualifier) {
+    const genericPerformanceMatches = adjusted.requestMatches.filter((signal) =>
+      ['性能', '优化', 'performance'].includes(signal),
+    );
+    if (genericPerformanceMatches.length > 0) {
+      adjusted.score = Math.max(0, adjusted.score - genericPerformanceMatches.length * 3);
+      adjusted.notes.push('文档任务中的性能/优化否定或范围说明不作为性能优化主线路。');
+    }
+  }
+
+  if (name === 'course_docs' && context.documentIntent && context.scopedPerformanceQualifier) {
+    adjusted.score += 4;
+    adjusted.notes.push('识别到文档同步任务，且性能优化只是范围边界说明。');
+  }
+
+  return adjusted;
+}
+
 function selectLane(request, files, routebook) {
   const lanes = routebook.lanes || {};
+  const context = intakeContext(request);
   const scored = Object.entries(lanes)
-    .map(([name, lane]) => ({ name, lane, ...scoreLane(request, files, lane) }))
+    .map(([name, lane]) => ({ name, lane, ...adjustLaneScore(name, scoreLane(request, files, lane), context) }))
     .filter((item) => item.name !== routebook.defaultLane);
 
   scored.sort((a, b) => b.score - a.score);
@@ -172,6 +242,9 @@ ${list(primary.fileMatches)}
 Supporting lane signals:
 ${list(supporting.map((item) => `${item.name}: ${[...item.requestMatches, ...item.fileMatches].join(', ')}`))}
 
+Routing notes:
+${list(unique(participatingLanes.flatMap((item) => item.notes || [])))}
+
 Changed files:
 ${list(files, 'No changed files detected.')}
 
@@ -198,10 +271,16 @@ ${list(proof)}
 - Do not introduce backend scope unless explicitly requested.
 `;
 
-  fs.mkdirSync(path.dirname(WORK_ORDER_FILE), { recursive: true });
-  fs.writeFileSync(WORK_ORDER_FILE, content, 'utf8');
+  if (args.expectLane && primary.name !== args.expectLane) {
+    fail(`Expected primary lane ${args.expectLane}, got ${primary.name}`);
+  }
 
-  console.log(`Work order written to ${WORK_ORDER_FILE}`);
+  if (!args.dryRun) {
+    fs.mkdirSync(path.dirname(WORK_ORDER_FILE), { recursive: true });
+    fs.writeFileSync(WORK_ORDER_FILE, content, 'utf8');
+  }
+
+  console.log(args.dryRun ? 'Dry run: work order not written' : `Work order written to ${WORK_ORDER_FILE}`);
   console.log(`Primary lane: ${primary.name}`);
   if (supporting.length) console.log(`Supporting lanes: ${supporting.map((item) => item.name).join(', ')}`);
   console.log(`Skills: ${skills.length ? skills.join(', ') : 'None'}`);

@@ -132,8 +132,7 @@
       "fileSignals": [
         "benchmark",
         "performance",
-        "test",
-        "docs/"
+        "test"
       ],
       "skills": [
         "docs/harness/skills/performance-evidence.md",
@@ -158,6 +157,17 @@
         "报告",
         "需求",
         "概要设计",
+        "技术设计",
+        "设计文档",
+        "同步",
+        "口径",
+        "状态",
+        "主流程",
+        ".md",
+        "md格式",
+        "markdown",
+        "README",
+        "docs/",
         "测试",
         "测试报告",
         "使用说明",
@@ -240,4 +250,3 @@
     }
   }
 }
-
