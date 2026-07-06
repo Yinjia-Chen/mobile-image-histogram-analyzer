@@ -152,6 +152,29 @@
     elements.statusText.classList.toggle("is-success", kind === "success");
   }
 
+  function setProcessing(elements, active, message, percent) {
+    if (!elements.processingPanel || !elements.progressBar || !elements.processingLabel) {
+      return;
+    }
+
+    elements.processingPanel.hidden = !active;
+    elements.processingLabel.textContent = message || "正在处理";
+    elements.progressBar.style.width = clamp(percent || 0, 0, 100) + "%";
+  }
+
+  function afterPaint(callback) {
+    return new Promise(function waitForPaint(resolve) {
+      var scheduler = typeof requestAnimationFrame === "function"
+        ? requestAnimationFrame
+        : function fallback(next) {
+          setTimeout(next, 16);
+        };
+      scheduler(function runCallback() {
+        resolve(callback());
+      });
+    });
+  }
+
   function loadImageFromFile(file) {
     return new Promise(function loadImage(resolve, reject) {
       var objectUrl = URL.createObjectURL(file);
@@ -180,6 +203,9 @@
       imageMeta: documentRef.getElementById("imageMeta"),
       sourceCanvas: documentRef.getElementById("sourceCanvas"),
       histogramCanvas: documentRef.getElementById("histogramCanvas"),
+      processingPanel: documentRef.getElementById("processingPanel"),
+      processingLabel: documentRef.getElementById("processingLabel"),
+      progressBar: documentRef.getElementById("progressBar"),
       elapsedText: documentRef.getElementById("elapsedText"),
       binCountText: documentRef.getElementById("binCountText"),
       maxCountText: documentRef.getElementById("maxCountText"),
@@ -208,6 +234,7 @@
       }
 
       setStatus(elements, "正在处理图片", "");
+      setProcessing(elements, true, "正在载入图片", 24);
       loadImageFromFile(file)
         .then(function handleLoaded(payload) {
           if (currentObjectUrl) {
@@ -218,15 +245,30 @@
           elements.previewImage.classList.add("is-visible");
           elements.previewPlaceholder.hidden = true;
 
-          var result = generateHistogram(payload.image, elements.sourceCanvas, elements.histogramCanvas);
+          setStatus(elements, "图片已载入，正在生成直方图", "");
+          setProcessing(elements, true, "读取像素与统计 bins", 62);
+          return afterPaint(function runHistogram() {
+            var result = generateHistogram(payload.image, elements.sourceCanvas, elements.histogramCanvas);
+            return {
+              result: result
+            };
+          });
+        })
+        .then(function handleResult(payload) {
+          var result = payload.result;
           elements.imageMeta.textContent = result.width + " x " + result.height;
           elements.elapsedText.textContent = "耗时 " + formatElapsed(result.elapsedMs) + " ms";
           elements.binCountText.textContent = String(HISTOGRAM_WIDTH);
           elements.maxCountText.textContent = String(result.maxCount);
           elements.pixelCountText.textContent = String(result.pixelCount);
+          setProcessing(elements, true, "直方图生成完成", 100);
           setStatus(elements, "直方图生成完成", "success");
+          setTimeout(function hideProcessing() {
+            setProcessing(elements, false, "", 0);
+          }, 420);
         })
         .catch(function handleError(error) {
+          setProcessing(elements, false, "", 0);
           setStatus(elements, error.message || "图像处理失败，请重试", "error");
         })
         .finally(function resetInput() {

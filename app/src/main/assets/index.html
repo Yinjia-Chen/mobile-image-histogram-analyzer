@@ -7,35 +7,78 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main class="app-shell">
+  <main class="app-shell app-shell--optimized">
     <header class="topbar">
-      <div>
-        <p class="eyebrow">Offline H5 Canvas</p>
-        <h1>移动端图像直方图分析系统</h1>
+      <div class="brand-lockup">
+        <div class="app-mark" aria-hidden="true">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+        <div>
+          <p class="eyebrow">On-device Canvas Lab</p>
+          <h1>移动端图像直方图分析系统</h1>
+        </div>
       </div>
-      <label class="choose-button" for="imageInput">
-        <span aria-hidden="true">+</span>
-        <span>选择图片</span>
-      </label>
+      <div class="top-actions">
+        <span class="mode-chip mode-chip--optimized">优化后</span>
+        <label class="choose-button" for="imageInput">
+          <span class="choose-icon" aria-hidden="true"></span>
+          <span>选择图片</span>
+        </label>
+      </div>
       <input id="imageInput" type="file" accept="image/*">
     </header>
+
+    <section class="insight-strip" aria-label="应用能力概览">
+      <div>
+        <span>运行环境</span>
+        <strong>离线 WebView</strong>
+      </div>
+      <div>
+        <span>输出规格</span>
+        <strong>256 x 100</strong>
+      </div>
+      <div>
+        <span>灰度 bins</span>
+        <strong>256</strong>
+      </div>
+    </section>
 
     <section class="workspace" aria-label="图像直方图分析工作区">
       <div class="preview-pane">
         <div class="pane-header">
-          <h2>原图预览</h2>
+          <div>
+            <p class="section-kicker">Input</p>
+            <h2>原图预览</h2>
+          </div>
           <span id="imageMeta">未选择图片</span>
         </div>
         <div class="preview-stage">
           <img id="previewImage" alt="已选择图片预览">
-          <p id="previewPlaceholder">选择一张本地图片后显示预览</p>
+          <div id="previewPlaceholder" class="empty-state">
+            <span class="empty-icon" aria-hidden="true"></span>
+            <p>选择一张本地图片后显示预览</p>
+          </div>
         </div>
       </div>
 
       <div class="result-pane">
         <div class="pane-header">
-          <h2>直方图</h2>
+          <div>
+            <p class="section-kicker">Result</p>
+            <h2>灰度直方图</h2>
+          </div>
           <span id="elapsedText">耗时 -- ms</span>
+        </div>
+        <div id="processingPanel" class="processing-panel" hidden>
+          <div class="processing-copy">
+            <span id="processingLabel">正在处理</span>
+            <strong>生成中</strong>
+          </div>
+          <div class="progress-track" aria-hidden="true">
+            <span id="progressBar"></span>
+          </div>
         </div>
         <div class="histogram-stage">
           <canvas id="histogramCanvas" width="256" height="100" aria-label="256x100 黑白直方图"></canvas>
