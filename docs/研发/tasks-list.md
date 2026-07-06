@@ -54,7 +54,7 @@
 | T-24 | APK 打包与安装验证 | 测试验收 | `blocked` | T-21 | 已生成可安装 debug APK：`dist/mobile-histogram-stage4-debug.apk`，构建与包内容证据见 `docs/测试/stage4-apk-handoff.md`；安装验证由用户在手机上执行，等待回填手机型号、Android 版本、安装启动结果、截图和问题记录 |
 | T-25 | 测试计划与测试报告 | 文档产物 | `todo` | T-21、T-22、T-23、T-24 | 输出测试范围、测试用例、执行结果、问题记录和结论 |
 | T-26 | 使用说明 | 文档产物 | `todo` | T-24 | 说明 APK 安装、启动、选图、查看直方图和注意事项 |
-| T-27 | 性能优化方案与记录 | 后续优化 | `deferred` | T-21、T-23 | 主流程稳定后单独记录优化前后耗时，不阻塞第一阶段主流程 |
+| T-27 | 性能优化方案与记录 | 后续优化 | `doing` | T-21、T-23 | 正在改为性能对照实验与证据固化：新增低效 baseline 页面、benchmark，并通过 Android product flavors 输出可并装 APK；已完成视觉升级、launcher 图标和 loading 状态，最新 APK 见 `dist/mobile-histogram-baseline-coinstall-debug.apk` 与 `dist/mobile-histogram-optimized-coinstall-debug.apk` |
 | T-28 | 答辩 PPT 与演示脚本 | 课程验收 | `todo` | T-24、T-25、T-26 | 准备可重复演示路径、功能说明、算法解释和测试结论 |
 | T-29 | 课程思政报告 | 课程验收 | `todo` | T-04 | 按课程要求补充思政相关材料 |
 | T-30 | 最终交付检查 | 课程验收 | `todo` | T-24 至 T-29 | 检查源码、APK、文档、测试记录和答辩材料是否完整 |
@@ -140,3 +140,5 @@
 | 2026-07-06 | 完成第 2 阶段 H5 直方图主流程：T-12 至 T-20、T-22 标记为 `done`，debug APK 输出至 `dist/mobile-histogram-stage2-debug.apk`，证据记录于 `docs/测试/stage2-histogram-main-flow-evidence.md`。 |
 | 2026-07-06 | 补充第 3 阶段算法测试和离线自测证据：新增主流程 fake Canvas 测试、APK/H5 离线资源检查和本地 H5 加载截图；T-21 标记为 `blocked`，等待手机断网选图运行证据。 |
 | 2026-07-06 | 根据用户反馈将 T-21 更新为 `done`；完成第 4 阶段 APK 打包，输出 `dist/mobile-histogram-stage4-debug.apk`，T-24 标记为 `blocked` 等待用户手机安装验证回填。 |
+| 2026-07-06 | 开始第 5 阶段性能对照实验：新增低效对照 benchmark、H5 baseline 页面和 Android product flavors，输出优化前/优化后两份可并装 APK 供手机安装对比测试，待用户确认后再固化提交。 |
+| 2026-07-06 | 对优化前/优化后双 APK 做视觉体验升级：新增 launcher 图标、原生感页面布局、模式标识、处理进度条和状态反馈，并重新输出两份可并装 APK。 |
