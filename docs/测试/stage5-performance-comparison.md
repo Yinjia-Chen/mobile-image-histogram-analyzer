@@ -105,8 +105,8 @@ APK 信息：
 
 | APK | 路径 | 包名 | versionName | 大小 | SHA256 |
 | --- | --- | --- | --- | ---: | --- |
-| 优化前 | `dist/mobile-histogram-baseline-coinstall-debug.apk` | `com.framia.mobilehistogram.baseline` | `0.1.0-baseline` | 45,816 bytes | `b91dbb24aaa1d0e4ab0056d8d5663edfdc858004264e03ac80e55f29a95ad2dc` |
-| 优化后 | `dist/mobile-histogram-optimized-coinstall-debug.apk` | `com.framia.mobilehistogram.optimized` | `0.1.0-optimized` | 45,812 bytes | `9b15c68ef0b5fb4780333b04745c5d1bb89623788baafb3f0ac53cb439d2bcf6` |
+| 优化前 | `dist/mobile-histogram-baseline-coinstall-debug.apk` | `com.framia.mobilehistogram.baseline` | `0.1.0-baseline` | 62,120 bytes | `6a5869e10a4e1b025c231658e75096cf49578d06c2223c16abbe6d696608d962` |
+| 优化后 | `dist/mobile-histogram-optimized-coinstall-debug.apk` | `com.framia.mobilehistogram.optimized` | `0.1.0-optimized` | 55,009 bytes | `d3310303d4a4bee46579e4865c735415e3ba2fb4402f75b22dc7d13053a1ce2d` |
 
 APK 内包含：
 
@@ -150,6 +150,7 @@ BUILD SUCCESSFUL
 - H5 页面新增品牌头、模式标识、图片空状态、开屏直方图波动动画、全屏生成进度条、完成 toast 和处理终端；
 - H5 页面由单页瀑布改为 `接入 / 链路 / 输出 / 指标 / 协议 / 日志` 多视图跳转结构；
 - 指标和协议卡片补充小字注释，用于解释灰度桶、最大计数、像素总数、公式、通道、归一化和输出画布含义；
+- 关键结果直方图支持点击横向全屏放大，长按保存“原图 + 分割说明 + 256x100 直方图”的拼接 PNG 到系统图片库；
 - 移动端顶部增加 Android WebView 状态栏安全区，并压缩顶部控制台高度，避免状态栏遮挡首屏头部内容；
 - 优化前和优化后共享同一套视觉系统，但保留不同模式标签；
 - 图片处理流程增加载入、统计、完成的状态反馈。
