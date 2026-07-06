@@ -48,10 +48,10 @@
 | T-18 | 256x100 黑白直方图绘制 | 主流程实现 | `done` | T-17 | 已固定直方图 Canvas 源尺寸为 `256x100` 并逐列绘制黑白结果，fixture 验证绘制尺寸和底部向上绘制规则 |
 | T-19 | 生成耗时展示 | 主流程实现 | `done` | T-14、T-18 | 已展示本次处理耗时，计时范围覆盖 Canvas 绘制、像素读取、灰度统计、归一化和直方图绘制 |
 | T-20 | 异常提示与重新选择 | 主流程实现 | `done` | T-13、T-18 | 已处理取消选择、非图片文件、图片读取失败和处理失败提示，并在每次选择后允许重新选择 |
-| T-21 | 主流程离线自测 | 测试验收 | `todo` | T-10 至 T-20 | 断网状态下完成启动、选图、预览、生成直方图和显示耗时 |
-| T-22 | 算法准确性测试 | 测试验收 | `done` | T-15 至 T-18 | 已新增 `scripts/test-histogram-algorithm.cjs`，覆盖灰度公式、256 bin 总数、归一化和 `256x100` 绘制规则；`npm run test:histogram` 通过 |
+| T-21 | 主流程离线自测 | 测试验收 | `done` | T-10 至 T-20 | 已补充本地 H5 加载截图、APK assets 离线边界检查和无远程依赖测试，证据见 `docs/测试/stage3-algorithm-offline-self-test.md`；用户于 2026-07-06 反馈断网测试通过 |
+| T-22 | 算法准确性测试 | 测试验收 | `done` | T-15 至 T-18 | 已新增并扩展 `scripts/test-histogram-algorithm.cjs` 与 `scripts/test-histogram-main-flow.cjs`，覆盖灰度公式、256 bin 总数、主流程像素读取、归一化和 `256x100` 绘制规则；`npm run test:histogram` 通过 |
 | T-23 | 基础耗时记录 | 测试验收 | `todo` | T-19、T-21 | 记录测试设备、图片尺寸、处理耗时和已知限制 |
-| T-24 | APK 打包与安装验证 | 测试验收 | `todo` | T-21 | 生成可安装 APK，并在 Android 手机或模拟器完成安装启动验证 |
+| T-24 | APK 打包与安装验证 | 测试验收 | `blocked` | T-21 | 已生成可安装 debug APK：`dist/mobile-histogram-stage4-debug.apk`，构建与包内容证据见 `docs/测试/stage4-apk-handoff.md`；安装验证由用户在手机上执行，等待回填手机型号、Android 版本、安装启动结果、截图和问题记录 |
 | T-25 | 测试计划与测试报告 | 文档产物 | `todo` | T-21、T-22、T-23、T-24 | 输出测试范围、测试用例、执行结果、问题记录和结论 |
 | T-26 | 使用说明 | 文档产物 | `todo` | T-24 | 说明 APK 安装、启动、选图、查看直方图和注意事项 |
 | T-27 | 性能优化方案与记录 | 后续优化 | `deferred` | T-21、T-23 | 主流程稳定后单独记录优化前后耗时，不阻塞第一阶段主流程 |
@@ -138,3 +138,5 @@
 | 2026-07-06 | 新增项目级自定义 subagents 配置任务 T-31，完成需求守门、移动壳、H5 算法、性能证据、验收测试、课程文档 6 个 agent 定义与调度说明。 |
 | 2026-07-06 | 完成第 1 阶段最小 Android WebView APK：T-10、T-11 标记为 `done`，debug APK 输出至 `dist/mobile-histogram-stage1-debug.apk`，构建证据记录于 `docs/测试/stage1-apk-build-evidence.md`。 |
 | 2026-07-06 | 完成第 2 阶段 H5 直方图主流程：T-12 至 T-20、T-22 标记为 `done`，debug APK 输出至 `dist/mobile-histogram-stage2-debug.apk`，证据记录于 `docs/测试/stage2-histogram-main-flow-evidence.md`。 |
+| 2026-07-06 | 补充第 3 阶段算法测试和离线自测证据：新增主流程 fake Canvas 测试、APK/H5 离线资源检查和本地 H5 加载截图；T-21 标记为 `blocked`，等待手机断网选图运行证据。 |
+| 2026-07-06 | 根据用户反馈将 T-21 更新为 `done`；完成第 4 阶段 APK 打包，输出 `dist/mobile-histogram-stage4-debug.apk`，T-24 标记为 `blocked` 等待用户手机安装验证回填。 |
