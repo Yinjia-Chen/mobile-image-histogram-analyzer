@@ -1,0 +1,243 @@
+{
+  "version": 1,
+  "defaultLane": "general_project",
+  "lanes": {
+    "assignment_contract": {
+      "description": "Course requirement, grading, scope, deadline, and deliverable interpretation.",
+      "signals": [
+        "任务书",
+        "要求",
+        "评分",
+        "范围",
+        "选题",
+        "课题",
+        "交付",
+        "deadline",
+        "验收",
+        "scope",
+        "requirement"
+      ],
+      "fileSignals": [
+        "README.md",
+        "docs/"
+      ],
+      "skills": [
+        "docs/harness/skills/assignment-contract.md"
+      ],
+      "cases": [
+        "docs/harness/cases/bad/backend-scope-creep.md"
+      ],
+      "inspect": [
+        "README.md",
+        "docs/harness/skills/assignment-contract.md"
+      ],
+      "proof": [
+        "State which task-book requirement the change supports.",
+        "State what remains out of scope."
+      ]
+    },
+    "histogram_algorithm": {
+      "description": "Grayscale formula, 256-bin statistics, normalization, Canvas rendering, and accuracy.",
+      "signals": [
+        "直方图",
+        "灰度",
+        "灰度化",
+        "256x100",
+        "归一化",
+        "像素",
+        "Canvas",
+        "算法",
+        "准确",
+        "histogram",
+        "grayscale",
+        "normalization"
+      ],
+      "fileSignals": [
+        "web/",
+        "src/",
+        "histogram",
+        "canvas"
+      ],
+      "skills": [
+        "docs/harness/skills/histogram-algorithm.md"
+      ],
+      "cases": [
+        "docs/harness/cases/bad/pretty-chart-wrong-scale.md"
+      ],
+      "inspect": [
+        "README.md",
+        "docs/harness/skills/histogram-algorithm.md",
+        "web/"
+      ],
+      "proof": [
+        "Show how 256 bins are computed.",
+        "Show how counts are normalized to 0..100.",
+        "Add or update deterministic fixtures when algorithm code exists."
+      ]
+    },
+    "mobile_shell": {
+      "description": "Android WebView shell, APK packaging, local assets, image selection, and offline runtime.",
+      "signals": [
+        "Android",
+        "APK",
+        "WebView",
+        "相册",
+        "图片选择",
+        "离线",
+        "权限",
+        "打包",
+        "安装",
+        "Gradle",
+        "app"
+      ],
+      "fileSignals": [
+        "app/",
+        "android/",
+        "gradle",
+        "AndroidManifest",
+        ".apk"
+      ],
+      "skills": [
+        "docs/harness/skills/mobile-webview-shell.md"
+      ],
+      "cases": [
+        "docs/harness/cases/good/offline-apk-demo-first.md",
+        "docs/harness/cases/bad/backend-scope-creep.md"
+      ],
+      "inspect": [
+        "docs/harness/skills/mobile-webview-shell.md",
+        "app/",
+        "web/"
+      ],
+      "proof": [
+        "Confirm core demo works without network when app code exists.",
+        "Confirm local image selection reaches H5 processing."
+      ]
+    },
+    "performance_evidence": {
+      "description": "Timing, benchmark design, optimization, and evidence for the 300ms target.",
+      "signals": [
+        "300ms",
+        "耗时",
+        "速度",
+        "性能",
+        "优化",
+        "benchmark",
+        "baseline",
+        "Worker",
+        "typed array",
+        "time",
+        "performance"
+      ],
+      "fileSignals": [
+        "benchmark",
+        "performance",
+        "test",
+        "docs/"
+      ],
+      "skills": [
+        "docs/harness/skills/performance-evidence.md",
+        "docs/harness/skills/histogram-algorithm.md"
+      ],
+      "cases": [
+        "docs/harness/cases/bad/pretty-chart-wrong-scale.md"
+      ],
+      "inspect": [
+        "docs/harness/skills/performance-evidence.md",
+        "docs/harness/skills/histogram-algorithm.md"
+      ],
+      "proof": [
+        "Record device, image size, mode, and measured time.",
+        "Keep baseline and optimized timings comparable."
+      ]
+    },
+    "course_docs": {
+      "description": "Requirement, design, test, usage, report, and PPT deliverables.",
+      "signals": [
+        "文档",
+        "报告",
+        "需求",
+        "概要设计",
+        "测试",
+        "测试报告",
+        "使用说明",
+        "PPT",
+        "答辩",
+        "思政",
+        "doc",
+        "report"
+      ],
+      "fileSignals": [
+        "docs/",
+        ".docx",
+        ".pptx",
+        "README.md"
+      ],
+      "skills": [
+        "docs/harness/skills/course-delivery-docs.md",
+        "docs/harness/skills/assignment-contract.md"
+      ],
+      "cases": [
+        "docs/harness/cases/bad/backend-scope-creep.md"
+      ],
+      "inspect": [
+        "README.md",
+        "docs/harness/skills/course-delivery-docs.md"
+      ],
+      "proof": [
+        "Link document claims to source, test evidence, or known plan status.",
+        "Keep core scope and optional scope separate."
+      ]
+    },
+    "presentation_acceptance": {
+      "description": "Final demo path, APK acceptance checklist, and defense script.",
+      "signals": [
+        "演示",
+        "答辩",
+        "验收",
+        "展示",
+        "安装包",
+        "demo",
+        "acceptance",
+        "presentation"
+      ],
+      "fileSignals": [
+        "docs/",
+        ".pptx",
+        ".apk"
+      ],
+      "skills": [
+        "docs/harness/skills/presentation-acceptance.md",
+        "docs/harness/skills/performance-evidence.md"
+      ],
+      "cases": [
+        "docs/harness/cases/good/offline-apk-demo-first.md"
+      ],
+      "inspect": [
+        "docs/harness/skills/presentation-acceptance.md",
+        "docs/harness/skills/performance-evidence.md"
+      ],
+      "proof": [
+        "Keep a repeatable APK demo path.",
+        "Prepare local images and benchmark evidence."
+      ]
+    },
+    "general_project": {
+      "description": "Small repository maintenance or early project work without a specialized lane.",
+      "signals": [],
+      "fileSignals": [],
+      "skills": [
+        "docs/harness/skills/assignment-contract.md"
+      ],
+      "cases": [],
+      "inspect": [
+        "README.md",
+        "docs/harness/histogram-delivery-harness.md"
+      ],
+      "proof": [
+        "Keep the change aligned with the Android WebView + H5 Canvas plan."
+      ]
+    }
+  }
+}
+

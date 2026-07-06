@@ -1,0 +1,12 @@
+{
+  "name": "mobile-histogram-practice",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Android WebView + H5 Canvas mobile image histogram course project.",
+  "scripts": {
+    "harness:intake": "node scripts/harness-intake.mjs",
+    "harness:check-docs": "bash scripts/harness-check-docs.sh",
+    "harness:verify": "bash scripts/harness-verify.sh"
+  }
+}
+

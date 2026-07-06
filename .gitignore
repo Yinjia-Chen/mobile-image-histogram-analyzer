@@ -20,3 +20,7 @@ local.properties
 
 # Word temporary files
 ~$*
+
+# Harness generated files
+.agent/tmp/current-work-order.md
+.agent/tmp/latest-request.md
