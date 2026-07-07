@@ -60,6 +60,7 @@
 | T-30 | 最终交付检查 | 课程验收 | `todo` | T-24 至 T-29 | 检查源码、APK、文档、测试记录和答辩材料是否完整 |
 | T-31 | 项目自定义 subagents 配置 | 协作管理 | `done` | T-09 | 已在 `.codex/agents/` 建立项目级自定义 agents，并提供 README 调度说明；通过 `npm run harness:verify` 验证 |
 | T-32 | 核心源码注释比例核查 | 课程验收 | `done` | T-10 至 T-22 | 已将 `app/src` 下 JS、Java、CSS、HTML、XML 源码/资源代码补充为中文分段注释，避免集中堆在文件顶部；`npm run check:source-comments` 校验 14 个 `app/src` 文件均有注释，优化版核心源码注释/代码比为 `392/1172 = 0.334`，高于三分之一，且已接入 `npm run harness:verify` |
+| T-33 | 项目经理文档补齐 | 文档产物 | `done` | T-04 至 T-32 | 已在 `docs/项目经理/` 补齐项目计划、进度跟踪表和风险识别表；文档按五天完成口径整理，区分已完成、待补齐和待回填事项 |
 
 ## 4. 阶段拆分
 
@@ -130,6 +131,7 @@
 - T-28 答辩 PPT 与演示脚本
 - T-29 课程思政报告
 - T-30 最终交付检查
+- T-33 项目经理文档补齐
 
 ## 5. 本次更新记录
 
@@ -175,3 +177,4 @@
 | 2026-07-07 | 按“源码思路明确、运行稳定、注释清晰且数量多于代码 1/3”要求补充优化版核心源码注释，新增 `scripts/check-source-comments.cjs` 并接入 `npm run harness:verify`；`app.js` 注释比 `0.353`、`MainActivity.java` 注释比 `0.525`、核心总注释比 `0.374`，算法与离线验证通过。 |
 | 2026-07-07 | 按用户要求将新增源码注释改为中文：优化版 `app.js` 阅读地图、`MainActivity.java` 壳层说明和注释比例检查脚本均已中文化；核心总注释比 `0.369`，仍高于三分之一，算法测试通过。 |
 | 2026-07-07 | 按用户要求将注释从顶部聚合改为分段就地注释，并覆盖 `app/src` 下所有 JS、Java、CSS、HTML、XML 源码/资源代码；`check-source-comments` 已扩展为检查 14 个 `app/src` 文件注释覆盖，当前核心总注释比 `0.334`，`npm run test:histogram`、`npm run test:baseline`、`npm run test:offline` 与 `npm run harness:verify` 均通过。 |
+| 2026-07-07 | 按项目经理视角反向补齐管理文档：新增 `docs/项目经理/项目计划.md`、`docs/项目经理/进度跟踪表.md`、`docs/项目经理/风险识别表.md`，统一为五天完成版里程碑口径，明确项目范围、进度状态、风险应对和收尾待办；新增 T-33 并标记为 `done`。 |
