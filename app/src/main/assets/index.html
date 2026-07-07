@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- 启动动画层：只负责开屏视觉反馈，不参与真实直方图计算。 -->
   <div id="splashScreen" class="splash-screen" aria-label="启动动画">
     <div class="splash-core">
       <div class="splash-mark" aria-hidden="true">
@@ -43,7 +44,9 @@
     </div>
   </div>
 
+  <!-- 应用主容器：优化版正式演示界面，所有页面都离线运行在 WebView assets 中。 -->
   <main class="app-shell app-shell--optimized">
+    <!-- 顶栏模块：展示应用身份、优化版标识和本地图片选择入口。 -->
     <header class="topbar">
       <div class="brand-lockup">
         <div class="app-mark" aria-hidden="true">
@@ -66,6 +69,7 @@
       <input id="imageInput" type="file" accept="image/*">
     </header>
 
+    <!-- 底部/顶部页面导航：通过 data-screen-target 交给 app.js 切换页面。 -->
     <nav class="screen-tabs" aria-label="主要页面">
       <button class="is-active" type="button" data-screen-target="screen-analyze">
         <span class="tab-icon tab-icon--scan" aria-hidden="true"></span>
@@ -93,6 +97,7 @@
       </button>
     </nav>
 
+    <!-- 接入页：负责本地图片预览，真正处理会在用户选择图片后自动触发。 -->
     <section id="screen-analyze" class="app-screen is-active" data-screen>
       <div class="screen-heading">
         <span>NODE 01 / IMAGE INTAKE</span>
@@ -118,6 +123,7 @@
       </section>
     </section>
 
+    <!-- 链路页：用架构图解释 Android Shell、H5 Canvas、算法和结果层的关系。 -->
     <section id="screen-pipeline" class="app-screen" data-screen>
       <div class="screen-heading">
         <span>NODE 02 / PIPELINE</span>
@@ -202,6 +208,7 @@
       </aside>
     </section>
 
+    <!-- 输出页：承载生成进度、256x100 黑白直方图和双图对比模块。 -->
     <section id="screen-result" class="app-screen" data-screen>
       <div class="screen-heading screen-heading--compact">
         <span>NODE 03 / HISTOGRAM MATRIX</span>
@@ -310,6 +317,7 @@
       </div>
     </section>
 
+    <!-- 指标页：展示 bins、像素数、验收自检、性能余量和灰度分布解释。 -->
     <section id="screen-metrics" class="app-screen" data-screen>
       <div class="screen-heading">
         <span>NODE 04 / METRICS</span>
@@ -404,6 +412,7 @@
       </div>
     </section>
 
+    <!-- 协议页：集中列出课程验收要求中的公式、通道、归一化和 canvas 尺寸。 -->
     <section id="screen-data" class="app-screen" data-screen>
       <div class="screen-heading">
         <span>NODE 05 / COMPUTE PROTOCOL</span>
@@ -435,6 +444,7 @@
       </div>
     </section>
 
+    <!-- 日志页：记录选图、解码、读像素、统计、归一化和渲染过程。 -->
     <section id="screen-log" class="app-screen" data-screen>
       <div class="screen-heading">
         <span>NODE 06 / PROCESS LOG</span>
@@ -456,6 +466,7 @@
       </section>
     </section>
 
+    <!-- 全局状态与弹层：包含底部状态、处理中覆盖层、toast、放大查看和保存确认。 -->
     <p id="statusText" class="status" role="status" aria-live="polite">等待图像接入</p>
     <div id="processingOverlay" class="processing-overlay" role="status" aria-live="polite" hidden>
       <div class="processing-overlay-core">
@@ -493,8 +504,10 @@
       </div>
     </div>
 
+    <!-- 隐藏处理画布：只用于读取原图 RGBA 像素，不直接展示给用户。 -->
     <canvas id="sourceCanvas" hidden></canvas>
   </main>
+  <!-- 优化版业务脚本：包含灰度公式、256 bins、归一化、绘制和交互逻辑。 -->
   <script src="app.js"></script>
 </body>
 </html>

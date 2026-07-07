@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 深色底色：WebView 首帧绘制前保持与 H5 开屏一致。 -->
     <item>
         <shape android:shape="rectangle">
             <solid android:color="#050B0A" />
         </shape>
     </item>
+    <!-- 中央图标：系统启动预览阶段显示直方图应用标识。 -->
     <item
         android:width="96dp"
         android:height="96dp"

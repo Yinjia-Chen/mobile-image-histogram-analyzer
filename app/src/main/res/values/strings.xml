@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- 应用名称：默认显示名，flavor 构建时可通过 manifestPlaceholders 覆盖。 -->
     <string name="app_name">移动端图像直方图分析系统</string>
 </resources>

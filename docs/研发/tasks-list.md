@@ -59,6 +59,7 @@
 | T-29 | 课程思政报告 | 课程验收 | `todo` | T-04 | 按课程要求补充思政相关材料 |
 | T-30 | 最终交付检查 | 课程验收 | `todo` | T-24 至 T-29 | 检查源码、APK、文档、测试记录和答辩材料是否完整 |
 | T-31 | 项目自定义 subagents 配置 | 协作管理 | `done` | T-09 | 已在 `.codex/agents/` 建立项目级自定义 agents，并提供 README 调度说明；通过 `npm run harness:verify` 验证 |
+| T-32 | 核心源码注释比例核查 | 课程验收 | `done` | T-10 至 T-22 | 已将 `app/src` 下 JS、Java、CSS、HTML、XML 源码/资源代码补充为中文分段注释，避免集中堆在文件顶部；`npm run check:source-comments` 校验 14 个 `app/src` 文件均有注释，优化版核心源码注释/代码比为 `392/1172 = 0.334`，高于三分之一，且已接入 `npm run harness:verify` |
 
 ## 4. 阶段拆分
 
@@ -171,3 +172,6 @@
 | 2026-07-07 | 按用户确认重新打包优化前/优化后两份可并装 debug APK，输出至 `dist/mobile-histogram-baseline-coinstall-debug.apk` 与 `dist/mobile-histogram-optimized-coinstall-debug.apk`；已包含最新 UI、README 口径、Histogram Compare、loading、架构图和 flavor 专属 launcher 角标，并更新阶段 5 APK 大小与 SHA256 证据。 |
 | 2026-07-07 | 根据真机截图反馈收敛优化版 loading 与结果页：全屏进度由长条和微型直方图矩阵改为紧凑进度线与短阶段标签；Histogram Compare 默认收起，保存 A 后才展示 A/B 对比，避免生成单图时出现重复直方图；已重新打包优化前/优化后两份可并装 APK 并更新阶段 5 哈希证据。 |
 | 2026-07-07 | 根据用户继续反馈将生成中 loading 改为单行响应式状态条：移除 overlay 点阵和阶段胶囊，宽屏保留阶段说明，窄屏自动隐藏说明，极窄屏隐藏 PROCESSING 标签；不改变计时边界、灰度公式、256 bins 或 `256x100` 输出，并重新打包两份可并装 APK。 |
+| 2026-07-07 | 按“源码思路明确、运行稳定、注释清晰且数量多于代码 1/3”要求补充优化版核心源码注释，新增 `scripts/check-source-comments.cjs` 并接入 `npm run harness:verify`；`app.js` 注释比 `0.353`、`MainActivity.java` 注释比 `0.525`、核心总注释比 `0.374`，算法与离线验证通过。 |
+| 2026-07-07 | 按用户要求将新增源码注释改为中文：优化版 `app.js` 阅读地图、`MainActivity.java` 壳层说明和注释比例检查脚本均已中文化；核心总注释比 `0.369`，仍高于三分之一，算法测试通过。 |
+| 2026-07-07 | 按用户要求将注释从顶部聚合改为分段就地注释，并覆盖 `app/src` 下所有 JS、Java、CSS、HTML、XML 源码/资源代码；`check-source-comments` 已扩展为检查 14 个 `app/src` 文件注释覆盖，当前核心总注释比 `0.334`，`npm run test:histogram`、`npm run test:baseline`、`npm run test:offline` 与 `npm run harness:verify` 均通过。 |

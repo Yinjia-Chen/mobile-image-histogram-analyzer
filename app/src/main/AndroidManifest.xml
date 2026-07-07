@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Android 9 及以下保存拼接图时需要写外部存储；Android 10+ 使用 MediaStore。 -->
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
 
+    <!-- 应用节点：使用 flavor 注入的名称和本地 drawable 图标，不声明网络能力。 -->
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher_histogram"
@@ -12,9 +14,11 @@
         android:roundIcon="@drawable/ic_launcher_histogram"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <!-- 主 Activity：承载全屏 WebView，并作为桌面启动入口。 -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
+            <!-- 启动器入口：安装后从桌面图标打开 APK。 -->
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

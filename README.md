@@ -172,6 +172,7 @@ npm run test:histogram
 npm run test:offline
 npm run test:baseline
 npm run benchmark:histogram
+npm run check:source-comments
 npm run harness:verify
 ```
 
@@ -184,6 +185,7 @@ npm run harness:verify
 - `256x100` 绘制规则；
 - Android assets 离线边界；
 - baseline 与 optimized 输出一致性。
+- `app/src` 下 JS、Java、CSS、HTML、XML 源码/资源代码均有中文分段注释，优化版核心源码注释/代码比例超过三分之一。
 
 ## 仓库结构
 

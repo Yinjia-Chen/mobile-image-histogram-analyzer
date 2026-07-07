@@ -11,6 +11,7 @@
     "test:baseline": "node scripts/test-histogram-baseline.cjs",
     "test:offline": "node scripts/test-offline-assets.cjs",
     "benchmark:histogram": "node scripts/benchmark-histogram-performance.cjs",
+    "check:source-comments": "node scripts/check-source-comments.cjs",
     "preview": "node scripts/preview-assets.cjs"
   }
 }

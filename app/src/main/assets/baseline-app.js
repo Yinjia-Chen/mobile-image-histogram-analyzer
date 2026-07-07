@@ -1,3 +1,4 @@
+/* baseline 模块入口：用于性能对照 APK，同时兼容 WebView 和 Node.js 测试。 */
 (function initBaselineHistogramModule(root, factory) {
   var api = factory();
 
@@ -16,6 +17,7 @@
 })(typeof globalThis !== "undefined" ? globalThis : null, function createBaselineHistogramModule() {
   "use strict";
 
+  /* baseline 配置：保持同样的 256x100 输出，但加入冗余轮次制造低效对照。 */
   var HISTOGRAM_WIDTH = 256;
   var HISTOGRAM_HEIGHT = 100;
   var BASELINE_REDUNDANT_PIXEL_ROUNDS = 160;
@@ -32,15 +34,18 @@
     { id: "done", label: "Done", detail: "Baseline 结果已写入输出矩阵" }
   ];
 
+  /* 范围限制工具：保证灰度 bin、柱高和导出尺寸都不会越界。 */
   function clamp(value, min, max) {
     return Math.min(max, Math.max(min, value));
   }
 
+  /* 灰度公式模块：baseline 也必须使用课程指定公式，保证结果可对比。 */
   function computeGrayBin(red, green, blue) {
     var gray = red * 0.299 + green * 0.587 + blue * 0.114;
     return clamp(Math.round(gray), 0, 255);
   }
 
+  /* 低效灰度模块：重复字符串转换和计算，用来放大 baseline 性能差异。 */
   function computeGrayBinSlow(pixel) {
     var grayBin = 0;
     for (var round = 0; round < BASELINE_REDUNDANT_PIXEL_ROUNDS; round += 1) {
@@ -49,6 +54,7 @@
     return grayBin;
   }
 
+  /* baseline 统计模块：使用普通数组、对象映射和冗余计算形成压力对照。 */
   function buildHistogramFromRgbaBaseline(data) {
     if (!data || data.length % 4 !== 0) {
       throw new Error("RGBA pixel data length must be divisible by 4.");
@@ -74,6 +80,7 @@
     return bins;
   }
 
+  /* bins 求和模块：用于校验 baseline 也统计了全部像素。 */
   function sumBins(bins) {
     var total = 0;
     for (var index = 0; index < bins.length; index += 1) {
@@ -82,6 +89,7 @@
     return total;
   }
 
+  /* 最大计数模块：用于结果指标和归一化参照。 */
   function maxBinCount(bins) {
     var maxCount = 0;
     for (var index = 0; index < bins.length; index += 1) {
@@ -92,6 +100,7 @@
     return maxCount;
   }
 
+  /* baseline 归一化模块：故意重复扫描最大值，保持结果正确但降低效率。 */
   function normalizeHistogramBaseline(bins) {
     if (!bins || bins.length !== HISTOGRAM_WIDTH) {
       throw new Error("Histogram bins must contain exactly 256 values.");
@@ -112,6 +121,7 @@
     return normalized;
   }
 
+  /* 对比快照模块：复制归一化高度，避免后续图片覆盖已保存的 A。 */
   function cloneNormalizedBins(normalizedBins) {
     var clone = new Uint8Array(HISTOGRAM_WIDTH);
     if (!normalizedBins) {
@@ -123,6 +133,7 @@
     return clone;
   }
 
+  /* 直方图绘制模块：baseline 也输出严格的 256x100 黑白 canvas。 */
   function drawHistogram(canvas, normalizedBins) {
     if (!canvas || !canvas.getContext) {
       throw new Error("Histogram canvas is unavailable.");
@@ -147,6 +158,7 @@
     }
   }
 
+  /* 像素读取模块：把本地图片画到隐藏 canvas 并读取 RGBA 数据。 */
   function drawImageToSourceCanvas(canvas, image) {
     if (!canvas || !canvas.getContext) {
       throw new Error("Source canvas is unavailable.");
@@ -167,6 +179,7 @@
     return context.getImageData(0, 0, width, height);
   }
 
+  /* 范围验收模块：检查归一化高度是否都在 0..100。 */
   function normalizedBinsInRange(normalizedBins) {
     if (!normalizedBins || normalizedBins.length !== HISTOGRAM_WIDTH) {
       return false;
@@ -179,6 +192,7 @@
     return true;
   }
 
+  /* 灰度分布模块：复用 bins 计算平均灰度、峰值和暗/中/亮比例。 */
   function analyzeGrayDistribution(bins, pixelCount) {
     var weightedTotal = 0;
     var peakGray = 0;
@@ -226,6 +240,7 @@
     };
   }
 
+  /* 曝光标签模块：把分布数据转成简短可讲的结论。 */
   function exposureLabel(distribution) {
     if (!distribution) {
       return "未分析";
@@ -239,6 +254,7 @@
     return "曝光正常";
   }
 
+  /* A/B 对比说明模块：生成 Histogram Compare 的文字结论。 */
   function createHistogramCompareInsight(beforeDistribution, afterDistribution) {
     if (!beforeDistribution || !afterDistribution) {
       return "先生成一张图并保存为 A，再选择第二张图完成对比。";
@@ -256,6 +272,7 @@
     return beforeLabel + " -> " + afterLabel + "，" + direction + "，平均灰度变化 " + delta.toFixed(1) + "。";
   }
 
+  /* 结果指标模块：汇总 baseline 的验收、性能、分布和对照信息。 */
   function createResultMetrics(result, histogramCanvas) {
     var binsTotal = sumBins(result.bins);
     var pixelProduct = result.width * result.height;
@@ -281,6 +298,7 @@
     };
   }
 
+  /* 一致性对照模块：baseline 使用当前优化版参考耗时做反向比较。 */
   function createConsistencyComparison(result, acceptance, baselineElapsedMs, currentElapsedMs) {
     var binsTotal = sumBins(result.bins);
     var checks = {
@@ -299,6 +317,7 @@
     };
   }
 
+  /* baseline 主算法模块：计时覆盖完整处理链路，并保留低效实现特征。 */
   function generateHistogramBaseline(image, sourceCanvas, histogramCanvas, now) {
     var clock = now || (typeof performance !== "undefined" && performance.now
       ? performance.now.bind(performance)
@@ -323,12 +342,14 @@
     return result;
   }
 
+  /* 状态文本模块：只负责提示文案和成功/失败样式。 */
   function setStatus(elements, message, kind) {
     elements.statusText.textContent = message;
     elements.statusText.classList.toggle("is-error", kind === "error");
     elements.statusText.classList.toggle("is-success", kind === "success");
   }
 
+  /* 轻提示模块：管理 toast 显示、退出动画和隐藏定时器。 */
   function showToast(elements, message) {
     if (!elements.toast) {
       return;
@@ -348,14 +369,17 @@
     }, 1800);
   }
 
+  /* 百分比格式化模块：把比例转成一位小数百分比。 */
   function formatPercent(value) {
     return (value * 100).toFixed(1) + "%";
   }
 
+  /* 性能余量格式化模块：显示与 300ms 目标的距离。 */
   function formatMargin(value) {
     return value.toFixed(1) + "%";
   }
 
+  /* 检查徽标模块：根据真实验收结果显示通过状态。 */
   function setCheckText(element, passed) {
     if (!element) {
       return;
@@ -365,6 +389,7 @@
     element.classList.toggle("is-fail", !passed);
   }
 
+  /* 指标面板模块：把 baseline 结果写入页面各项证据区域。 */
   function updateMetricsPanels(elements, result) {
     if (!result.metrics) {
       return;
@@ -403,6 +428,7 @@
     setCheckText(elements.comparisonFasterText, consistency.checks.currentFaster);
   }
 
+  /* 对比绘制模块：使用同一绘制函数生成 A/B 小直方图。 */
   function drawCompareCanvas(canvas, normalizedBins) {
     if (!canvas) {
       return;
@@ -410,6 +436,7 @@
     drawHistogram(canvas, normalizedBins || new Uint8Array(HISTOGRAM_WIDTH));
   }
 
+  /* 对比快照创建模块：保存当前 baseline 结果用于后续 A/B 对比。 */
   function createCompareSnapshot(result) {
     if (!result || !result.metrics) {
       return null;
@@ -423,6 +450,7 @@
     };
   }
 
+  /* 对比标签模块：显示快照尺寸和耗时。 */
   function formatCompareLabel(snapshot, fallback) {
     if (!snapshot) {
       return fallback;
@@ -430,6 +458,7 @@
     return snapshot.width + "x" + snapshot.height + " / " + formatElapsed(snapshot.elapsedMs) + "ms";
   }
 
+  /* 对比面板模块：维护 A/B canvas、标签和灰度变化说明。 */
   function updateComparePanel(elements) {
     if (!elements.compareCanvasA || !elements.compareCanvasB || !elements.compareInsightText) {
       return;
@@ -458,6 +487,7 @@
     elements.compareInsightText.textContent = createHistogramCompareInsight(beforeSnapshot.distribution, afterSnapshot.distribution);
   }
 
+  /* 对比按钮绑定模块：处理保存 A 和清空对比两种操作。 */
   function bindHistogramCompare(elements) {
     if (elements.saveCompareButton) {
       elements.saveCompareButton.addEventListener("click", function onSaveCompare() {
@@ -480,6 +510,7 @@
     }
   }
 
+  /* canvas 复制模块：把结果图复制到放大层。 */
   function copyCanvas(sourceCanvas, targetCanvas) {
     if (!sourceCanvas || !targetCanvas || !targetCanvas.getContext) {
       return;
@@ -492,6 +523,7 @@
     context.drawImage(sourceCanvas, 0, 0, HISTOGRAM_WIDTH, HISTOGRAM_HEIGHT);
   }
 
+  /* 拼接导出模块：生成原图、说明条和直方图合成 PNG。 */
   function buildCompositeCanvas(documentRef, image, histogramCanvas, result, modeLabel) {
     if (!image || !histogramCanvas || !result) {
       throw new Error("请先接入图片并生成直方图");
@@ -535,6 +567,7 @@
     return outputCanvas;
   }
 
+  /* 图片保存模块：APK 走 Android 桥，浏览器预览走下载 fallback。 */
   function saveCompositeImage(documentRef, elements) {
     try {
       var outputCanvas = buildCompositeCanvas(
@@ -570,6 +603,7 @@
     }
   }
 
+  /* 直方图放大模块：打开横向查看层，便于看清 256x100 输出。 */
   function openHistogramZoom(elements) {
     if (!elements.histogramZoom || !elements.histogramZoomCanvas) {
       return;
@@ -584,6 +618,7 @@
     elements.histogramZoom.classList.add("is-visible");
   }
 
+  /* 放大层关闭模块：关闭时同时收起保存确认框。 */
   function closeHistogramZoom(elements) {
     if (!elements.histogramZoom) {
       return;
@@ -593,6 +628,7 @@
     elements.histogramZoom.hidden = true;
   }
 
+  /* 保存确认模块：长按后要求用户明确确认导出。 */
   function openSaveConfirm(elements) {
     if (!elements.saveConfirmDialog) {
       return false;
@@ -604,12 +640,14 @@
     return true;
   }
 
+  /* 确认框关闭模块：取消保存时只关闭弹窗，不生成图片。 */
   function closeSaveConfirm(elements) {
     if (elements.saveConfirmDialog) {
       elements.saveConfirmDialog.hidden = true;
     }
   }
 
+  /* 放大交互绑定模块：统一处理点击、长按、遮罩和键盘关闭。 */
   function bindHistogramZoom(documentRef, elements) {
     if (!elements.histogramZoomTrigger || !elements.histogramZoomSurface) {
       return;
@@ -693,6 +731,7 @@
     });
   }
 
+  /* 日志时间模块：生成终端日志里的时间戳。 */
   function terminalTime() {
     var now = new Date();
     return [
@@ -702,6 +741,7 @@
     ].join(":");
   }
 
+  /* 终端日志模块：把 baseline 处理过程写到日志页面。 */
   function appendLog(elements, message) {
     if (!elements.terminalLog || !elements.terminalLog.ownerDocument) {
       return;
@@ -716,6 +756,7 @@
     elements.terminalLog.scrollTop = elements.terminalLog.scrollHeight;
   }
 
+  /* 启动日志模块：说明当前是低效对照引擎和离线运行环境。 */
   function appendBootLogs(elements) {
     appendLog(elements, "ENGINE: baseline comparison pipeline online.");
     appendLog(elements, "RUNTIME: offline H5 Canvas in Android WebView / browser preview, no remote assets required.");
@@ -723,10 +764,12 @@
     appendLog(elements, "TIMER: elapsed time uses the same boundary as optimized mode for fair comparison.");
   }
 
+  /* 文件描述模块：记录用户选择的本地图片信息。 */
   function describeFile(file) {
     return "FILE: name=\"" + file.name + "\", type=" + (file.type || "unknown") + ", size=" + Math.round(file.size / 1024) + " KB.";
   }
 
+  /* 解码日志模块：记录图片实际尺寸和像素数量。 */
   function appendImageDecodedLogs(elements, image) {
     var width = image.naturalWidth || image.width;
     var height = image.naturalHeight || image.height;
@@ -735,6 +778,7 @@
     appendLog(elements, "CANVAS: source canvas resized to " + width + "x" + height + " before getImageData().");
   }
 
+  /* 计算开始日志模块：记录 baseline 故意使用的低效统计策略。 */
   function appendComputeStartLogs(elements) {
     appendLog(elements, "READ: extracting RGBA buffer with willReadFrequently=true.");
     appendLog(elements, "BASELINE: copying ImageData into Array and creating per-pixel objects.");
@@ -742,12 +786,14 @@
     appendLog(elements, "NORMALIZE: max count is intentionally rescanned for every output bin.");
   }
 
+  /* 结果日志模块：记录 baseline 最大桶、像素数、耗时和输出尺寸。 */
   function appendResultLogs(elements, result) {
     appendLog(elements, "RESULT: maxBinCount=" + result.maxCount + ", pixelCount=" + result.pixelCount + ", elapsed=" + formatElapsed(result.elapsedMs) + " ms.");
     appendLog(elements, "VERIFY: sum(bins) should match pixelCount; displayed binCount=" + HISTOGRAM_WIDTH + ".");
     appendLog(elements, "RENDER: baseline histogram canvas committed as " + HISTOGRAM_WIDTH + "x" + HISTOGRAM_HEIGHT + " black-white bitmap.");
   }
 
+  /* 阶段查找模块：根据 stage id 取得 loading 文案。 */
   function getProcessingStage(stageId) {
     for (var index = 0; index < PROCESSING_STAGES.length; index += 1) {
       if (PROCESSING_STAGES[index].id === stageId) {
@@ -757,6 +803,7 @@
     return PROCESSING_STAGES[0];
   }
 
+  /* 阶段推断模块：把进度百分比映射到扫描、统计、归一化等阶段。 */
   function inferProcessingStage(percent) {
     if (percent >= 100) {
       return "done";
@@ -773,6 +820,7 @@
     return "scan";
   }
 
+  /* 步骤状态模块：同步阶段列表的激活和完成样式。 */
   function updateProcessingSteps(nodes, stageId, attributeName) {
     if (!nodes) {
       return;
@@ -801,6 +849,7 @@
     }
   }
 
+  /* 定时器清理模块：防止上一次处理的 loading 定时器串到下一次。 */
   function clearProcessingTimers(elements) {
     if (!elements.processingTimers) {
       return;
@@ -811,6 +860,7 @@
     elements.processingTimers = [];
   }
 
+  /* 进度演出模块：按脚本化步骤更新 baseline 处理进度。 */
   function runProcessingSequence(elements, steps) {
     clearProcessingTimers(elements);
     return new Promise(function sequence(resolve) {
@@ -827,6 +877,7 @@
     });
   }
 
+  /* loading 状态模块：统一控制进度条、覆盖层和阶段说明。 */
   function setProcessing(elements, active, message, percent, stageId) {
     if (!elements.processingPanel || !elements.progressBar || !elements.processingLabel) {
       return;
@@ -885,6 +936,7 @@
     }, 260);
   }
 
+  /* 输入方式模块：触摸输入隐藏焦点框，键盘输入保留焦点可见性。 */
   function bindInputModality(documentRef) {
     if (!documentRef.addEventListener || !documentRef.body) {
       return;
@@ -906,6 +958,7 @@
     documentRef.addEventListener("keydown", useKeyboardInput, true);
   }
 
+  /* 页面切换模块：在接入、链路、输出、指标、协议和日志间切换。 */
   function showScreen(elements, screenId) {
     if (!elements.screens || !elements.screenTabs) {
       return;
@@ -922,6 +975,7 @@
     }
   }
 
+  /* 导航绑定模块：把所有 data-screen-target 接入页面切换。 */
   function bindNavigation(documentRef, elements) {
     if (!documentRef.querySelectorAll) {
       return;
@@ -938,6 +992,7 @@
     }
   }
 
+  /* 开屏模块：处理 baseline 启动动画离场。 */
   function runSplash(elements) {
     if (!elements.splashScreen) {
       return;
@@ -951,6 +1006,7 @@
     }, 1500);
   }
 
+  /* 渲染让步模块：让 loading 先绘制，再执行较重 baseline 计算。 */
   function afterPaint(callback) {
     return new Promise(function waitForPaint(resolve) {
       var scheduler = typeof requestAnimationFrame === "function"
@@ -964,6 +1020,7 @@
     });
   }
 
+  /* 本地图像解码模块：用 object URL 解码本地文件，不依赖网络。 */
   function loadImageFromFile(file) {
     return new Promise(function loadImage(resolve, reject) {
       var objectUrl = URL.createObjectURL(file);
@@ -980,10 +1037,12 @@
     });
   }
 
+  /* 耗时格式化模块：根据耗时长短选择小数位。 */
   function formatElapsed(ms) {
     return ms.toFixed(ms >= 10 ? 1 : 2);
   }
 
+  /* 初始化模块：收集 DOM、绑定交互、绘制空图并接入选图主流程。 */
   function init(documentRef) {
     var elements = {
       imageInput: documentRef.getElementById("imageInput"),
@@ -1151,6 +1210,7 @@
     });
   }
 
+  /* 测试导出模块：把 baseline 纯函数暴露给脚本验证。 */
   return {
     HISTOGRAM_WIDTH: HISTOGRAM_WIDTH,
     HISTOGRAM_HEIGHT: HISTOGRAM_HEIGHT,

@@ -38,6 +38,7 @@ if [ -d "app" ]; then
 
   npm run test:histogram
   npm run test:offline
+  npm run check:source-comments
 
   if [ "${RUN_ANDROID_BUILD_VERIFY:-}" = "1" ]; then
     if [ -z "${JAVA_HOME:-}" ] || [ -z "${ANDROID_HOME:-}" ]; then

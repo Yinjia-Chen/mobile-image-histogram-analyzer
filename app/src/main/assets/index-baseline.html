@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <!-- baseline 启动动画层：用于区分优化前对照 APK 的视觉入口。 -->
   <div id="splashScreen" class="splash-screen splash-screen--baseline" aria-label="启动动画">
     <div class="splash-core">
       <div class="splash-mark" aria-hidden="true">
@@ -43,7 +44,9 @@
     </div>
   </div>
 
+  <!-- baseline 主容器：保持与优化版同结构，方便同图同流程对照。 -->
   <main class="app-shell app-shell--baseline">
+    <!-- 顶栏模块：展示 baseline 标识和本地图片选择入口。 -->
     <header class="topbar">
       <div class="brand-lockup">
         <div class="app-mark app-mark--baseline" aria-hidden="true">
@@ -66,6 +69,7 @@
       <input id="imageInput" type="file" accept="image/*">
     </header>
 
+    <!-- 页面导航：与优化版保持相同 tab 结构，便于演示时逐页比较。 -->
     <nav class="screen-tabs" aria-label="主要页面">
       <button class="is-active" type="button" data-screen-target="screen-analyze">
         <span class="tab-icon tab-icon--scan" aria-hidden="true"></span>
@@ -93,6 +97,7 @@
       </button>
     </nav>
 
+    <!-- 接入页：选择本地图片并显示预览，后续交给 baseline-app.js 处理。 -->
     <section id="screen-analyze" class="app-screen is-active" data-screen>
       <div class="screen-heading">
         <span>NODE 01 / BASELINE INTAKE</span>
@@ -118,6 +123,7 @@
       </section>
     </section>
 
+    <!-- 链路页：说明 baseline 故意保留的低效路径。 -->
     <section id="screen-pipeline" class="app-screen" data-screen>
       <div class="screen-heading">
         <span>NODE 02 / BASELINE PIPELINE</span>
@@ -155,6 +161,7 @@
       </aside>
     </section>
 
+    <!-- 输出页：baseline 仍输出同规格 256x100 黑白直方图。 -->
     <section id="screen-result" class="app-screen" data-screen>
       <div class="screen-heading screen-heading--compact">
         <span>NODE 03 / BASELINE MATRIX</span>
@@ -187,6 +194,7 @@
       </div>
     </section>
 
+    <!-- 指标页：展示 baseline 的准确性检查和性能对照证据。 -->
     <section id="screen-metrics" class="app-screen" data-screen>
       <div class="screen-heading">
         <span>NODE 04 / BASELINE METRICS</span>
@@ -281,6 +289,7 @@
       </div>
     </section>
 
+    <!-- 协议页：说明公式和输出协议不变，只改变实现路径用于性能对比。 -->
     <section id="screen-data" class="app-screen" data-screen>
       <div class="screen-heading">
         <span>NODE 05 / BASELINE PROTOCOL</span>
@@ -312,6 +321,7 @@
       </div>
     </section>
 
+    <!-- 日志页：记录低效对照路径中的载入、重复计算和绘制节点。 -->
     <section id="screen-log" class="app-screen" data-screen>
       <div class="screen-heading">
         <span>NODE 06 / BASELINE LOG</span>
@@ -333,6 +343,7 @@
       </section>
     </section>
 
+    <!-- 全局状态与弹层：状态条、处理中覆盖层、toast、放大查看和保存确认。 -->
     <p id="statusText" class="status" role="status" aria-live="polite">Baseline 对照版：等待图像接入</p>
     <div id="processingOverlay" class="processing-overlay processing-overlay--baseline" role="status" aria-live="polite" hidden>
       <div class="processing-overlay-core">
@@ -370,8 +381,10 @@
       </div>
     </div>
 
+    <!-- 隐藏处理画布：baseline 也从这里读取原图 RGBA 像素。 -->
     <canvas id="sourceCanvas" hidden></canvas>
   </main>
+  <!-- baseline 业务脚本：保持结果正确，但实现路径故意低效用于性能对照。 -->
   <script src="baseline-app.js"></script>
 </body>
 </html>
