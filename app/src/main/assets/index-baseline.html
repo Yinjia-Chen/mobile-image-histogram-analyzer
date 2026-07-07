@@ -336,13 +336,14 @@
     <p id="statusText" class="status" role="status" aria-live="polite">Baseline 对照版：等待图像接入</p>
     <div id="processingOverlay" class="processing-overlay processing-overlay--baseline" role="status" aria-live="polite" hidden>
       <div class="processing-overlay-core">
-        <span class="processing-overlay-kicker">BASELINE MATRIX</span>
-        <div class="processing-overlay-copy">
+        <div class="processing-overlay-line">
+          <span class="processing-overlay-kicker">BASELINE</span>
           <strong id="processingOverlayLabel">正在处理</strong>
+          <small id="processingOverlayDetail">低效对照路径执行中</small>
+          <div class="processing-overlay-track" aria-hidden="true">
+            <span id="processingOverlayBar"></span>
+          </div>
           <span id="processingOverlayPercent">0%</span>
-        </div>
-        <div class="processing-overlay-track" aria-hidden="true">
-          <span id="processingOverlayBar"></span>
         </div>
       </div>
     </div>

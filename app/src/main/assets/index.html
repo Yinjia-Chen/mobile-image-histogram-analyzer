@@ -125,30 +125,77 @@
         <p>把答辩讲解链路从接入页拆出，单页只展示核心步骤。</p>
       </div>
 
-      <aside class="action-pane module-panel">
+      <aside class="action-pane module-panel architecture-pane">
         <div class="pane-header">
           <div>
-            <p class="section-kicker">Pipeline</p>
-            <h2>离线计算链路</h2>
+            <p class="section-kicker">Architecture</p>
+            <h2>离线直方图架构</h2>
           </div>
-          <span>Armed</span>
+          <span>Offline APK</span>
         </div>
-        <div class="timeline-list">
-          <div>
-            <span>01</span>
-            <strong>本地载入</strong>
+        <div class="architecture-map" aria-label="图像直方图处理架构图">
+          <div class="architecture-lanes" aria-hidden="true">
+            <span>Android Shell</span>
+            <span>H5 Canvas</span>
+            <span>Algorithm Core</span>
+            <span>Result Layer</span>
           </div>
-          <div>
-            <span>02</span>
-            <strong>像素矩阵读取</strong>
+          <div class="architecture-flow">
+            <article class="architecture-node architecture-node--image">
+              <span>01</span>
+              <strong>Image</strong>
+              <small>local file</small>
+            </article>
+            <i class="architecture-arrow" aria-hidden="true"></i>
+            <article class="architecture-node architecture-node--decode">
+              <span>02</span>
+              <strong>Decode</strong>
+              <small>bitmap</small>
+            </article>
+            <i class="architecture-arrow" aria-hidden="true"></i>
+            <article class="architecture-node architecture-node--gray">
+              <span>03</span>
+              <strong>Gray</strong>
+              <small>0.299R + 0.587G + 0.114B</small>
+            </article>
+            <i class="architecture-arrow" aria-hidden="true"></i>
+            <article class="architecture-node architecture-node--histogram">
+              <span>04</span>
+              <strong>Histogram</strong>
+              <small>256 bins</small>
+            </article>
+            <i class="architecture-arrow" aria-hidden="true"></i>
+            <article class="architecture-node architecture-node--normalize">
+              <span>05</span>
+              <strong>Normalize</strong>
+              <small>0-100</small>
+            </article>
+            <i class="architecture-arrow" aria-hidden="true"></i>
+            <article class="architecture-node architecture-node--canvas">
+              <span>06</span>
+              <strong>Canvas</strong>
+              <small>256 x 100</small>
+            </article>
+            <i class="architecture-arrow" aria-hidden="true"></i>
+            <article class="architecture-node architecture-node--analysis">
+              <span>07</span>
+              <strong>Analysis</strong>
+              <small>time + metrics</small>
+            </article>
           </div>
-          <div>
-            <span>03</span>
-            <strong>灰度统计</strong>
-          </div>
-          <div>
-            <span>04</span>
-            <strong>归一化绘制</strong>
+          <div class="architecture-proof">
+            <div>
+              <span>Formula</span>
+              <strong>gray = 0.299R + 0.587G + 0.114B</strong>
+            </div>
+            <div>
+              <span>Statistics</span>
+              <strong>Uint32Array(256)</strong>
+            </div>
+            <div>
+              <span>Output</span>
+              <strong>256x100 Canvas</strong>
+            </div>
           </div>
         </div>
         <button class="ghost-link" type="button" data-screen-target="screen-data">查看工程协议</button>
@@ -172,11 +219,55 @@
         </div>
         <div id="processingPanel" class="processing-panel" hidden>
           <div class="processing-copy">
-            <span id="processingLabel">正在处理</span>
-            <strong>生成中</strong>
+            <div>
+              <span id="processingLabel">扫描像素</span>
+              <small id="processingDetail">读取图像像素矩阵</small>
+            </div>
+            <strong>PIPELINE ACTIVE</strong>
           </div>
+          <ol class="processing-steps" aria-label="生成阶段">
+            <li data-processing-step="scan">
+              <span>01</span>
+              <strong>扫描</strong>
+              <em>像素扫描</em>
+            </li>
+            <li data-processing-step="compute">
+              <span>02</span>
+              <strong>统计</strong>
+              <em>灰度统计</em>
+            </li>
+            <li data-processing-step="normalize">
+              <span>03</span>
+              <strong>归一</strong>
+              <em>归一化</em>
+            </li>
+            <li data-processing-step="render">
+              <span>04</span>
+              <strong>输出</strong>
+              <em>渲染输出</em>
+            </li>
+            <li data-processing-step="done">
+              <span>05</span>
+              <strong>完成</strong>
+              <em>完成</em>
+            </li>
+          </ol>
           <div class="progress-track" aria-hidden="true">
             <span id="progressBar"></span>
+          </div>
+          <div class="processing-wave" aria-hidden="true">
+            <span style="--level: 24%; --delay: 0ms;"></span>
+            <span style="--level: 62%; --delay: 40ms;"></span>
+            <span style="--level: 38%; --delay: 80ms;"></span>
+            <span style="--level: 84%; --delay: 120ms;"></span>
+            <span style="--level: 52%; --delay: 160ms;"></span>
+            <span style="--level: 92%; --delay: 200ms;"></span>
+            <span style="--level: 45%; --delay: 240ms;"></span>
+            <span style="--level: 72%; --delay: 280ms;"></span>
+            <span style="--level: 34%; --delay: 320ms;"></span>
+            <span style="--level: 80%; --delay: 360ms;"></span>
+            <span style="--level: 56%; --delay: 400ms;"></span>
+            <span style="--level: 68%; --delay: 440ms;"></span>
           </div>
         </div>
         <div class="histogram-stage">
@@ -184,6 +275,38 @@
             <canvas id="histogramCanvas" width="256" height="100" aria-label="256x100 黑白直方图"></canvas>
           </button>
         </div>
+        <section id="comparePanel" class="compare-panel" aria-label="Histogram Compare">
+          <div class="compare-header">
+            <div>
+              <span>Histogram Compare</span>
+              <strong>双图直方图对比</strong>
+            </div>
+            <div class="compare-actions">
+              <button id="saveCompareButton" type="button">保存当前为 A</button>
+              <button id="clearCompareButton" type="button">清空</button>
+            </div>
+          </div>
+          <div class="compare-stack">
+            <article>
+              <div>
+                <span>Histogram A</span>
+                <strong id="compareALabel">未保存</strong>
+              </div>
+              <canvas id="compareCanvasA" width="256" height="100" aria-label="Histogram A"></canvas>
+            </article>
+            <article>
+              <div>
+                <span>Histogram B</span>
+                <strong id="compareBLabel">等待第二张</strong>
+              </div>
+              <canvas id="compareCanvasB" width="256" height="100" aria-label="Histogram B"></canvas>
+            </article>
+          </div>
+          <div class="compare-summary">
+            <span>Compare Insight</span>
+            <strong id="compareInsightText">先生成一张图并保存为 A，再选择第二张图完成对比。</strong>
+          </div>
+        </section>
       </div>
     </section>
 
@@ -336,13 +459,14 @@
     <p id="statusText" class="status" role="status" aria-live="polite">等待图像接入</p>
     <div id="processingOverlay" class="processing-overlay" role="status" aria-live="polite" hidden>
       <div class="processing-overlay-core">
-        <span class="processing-overlay-kicker">PROCESSING MATRIX</span>
-        <div class="processing-overlay-copy">
-          <strong id="processingOverlayLabel">正在处理</strong>
+        <div class="processing-overlay-line">
+          <span class="processing-overlay-kicker">PROCESSING</span>
+          <strong id="processingOverlayLabel">扫描像素</strong>
+          <small id="processingOverlayDetail">读取图像像素矩阵</small>
+          <div class="processing-overlay-track" aria-hidden="true">
+            <span id="processingOverlayBar"></span>
+          </div>
           <span id="processingOverlayPercent">0%</span>
-        </div>
-        <div class="processing-overlay-track" aria-hidden="true">
-          <span id="processingOverlayBar"></span>
         </div>
       </div>
     </div>

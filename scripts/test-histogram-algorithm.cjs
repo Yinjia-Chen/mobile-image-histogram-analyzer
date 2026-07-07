@@ -50,14 +50,24 @@ darkBins[180] = 1;
 const darkDistribution = histogram.analyzeGrayDistribution(darkBins, 4);
 assertEqual(darkDistribution.peakGray, 20, "peak gray reports the highest-count bin");
 assertEqual(darkDistribution.conclusion, "图片偏暗", "dark-heavy distribution uses the simple rule conclusion");
+assertEqual(histogram.exposureLabel(darkDistribution), "曝光不足", "dark-heavy distribution is labeled underexposed for compare");
 
 const brightBins = new Uint32Array(256);
 brightBins[230] = 3;
 brightBins[80] = 1;
+const brightDistribution = histogram.analyzeGrayDistribution(brightBins, 4);
+assertEqual(brightDistribution.conclusion, "图片偏亮", "bright-heavy distribution uses the simple rule conclusion");
+assertEqual(histogram.exposureLabel(brightDistribution), "曝光偏高", "bright-heavy distribution is labeled overexposed for compare");
+
+const normalBins = new Uint32Array(256);
+normalBins[118] = 2;
+normalBins[138] = 2;
+const normalDistribution = histogram.analyzeGrayDistribution(normalBins, 4);
+assertEqual(histogram.exposureLabel(normalDistribution), "曝光正常", "mid-tone distribution is labeled normal exposure");
 assertEqual(
-  histogram.analyzeGrayDistribution(brightBins, 4).conclusion,
-  "图片偏亮",
-  "bright-heavy distribution uses the simple rule conclusion"
+  histogram.createHistogramCompareInsight(darkDistribution, normalDistribution),
+  "曝光不足 -> 曝光正常，整体变亮，平均灰度变化 68.0。",
+  "compare insight summarizes exposure transition and average gray delta"
 );
 
 const drawCalls = [];

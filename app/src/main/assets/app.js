@@ -23,6 +23,13 @@
   var LONG_PRESS_MS = 650;
   var PERFORMANCE_THRESHOLD_MS = 300;
   var BASELINE_REFERENCE_MS = 407.1;
+  var PROCESSING_STAGES = [
+    { id: "scan", label: "扫描像素", detail: "读取图像像素矩阵" },
+    { id: "compute", label: "统计直方图", detail: "套用灰度公式并写入 256 bins" },
+    { id: "normalize", label: "归一化", detail: "按最大计数归一化到 0-100" },
+    { id: "render", label: "渲染输出", detail: "提交 256x100 黑白直方图" },
+    { id: "done", label: "完成", detail: "结果已写入输出矩阵" }
+  ];
 
   function clamp(value, min, max) {
     return Math.min(max, Math.max(min, value));
@@ -83,6 +90,17 @@
       normalized[index] = clamp(Math.round((bins[index] / maxCount) * HISTOGRAM_HEIGHT), 0, HISTOGRAM_HEIGHT);
     }
     return normalized;
+  }
+
+  function cloneNormalizedBins(normalizedBins) {
+    var clone = new Uint8Array(HISTOGRAM_WIDTH);
+    if (!normalizedBins) {
+      return clone;
+    }
+    for (var index = 0; index < HISTOGRAM_WIDTH; index += 1) {
+      clone[index] = normalizedBins[index] || 0;
+    }
+    return clone;
   }
 
   function drawHistogram(canvas, normalizedBins) {
@@ -186,6 +204,36 @@
       brightRatio: brightRatio,
       conclusion: conclusion
     };
+  }
+
+  function exposureLabel(distribution) {
+    if (!distribution) {
+      return "未分析";
+    }
+    if (distribution.averageGray < 86 || distribution.darkRatio > 0.5) {
+      return "曝光不足";
+    }
+    if (distribution.averageGray > 170 || distribution.brightRatio > 0.5) {
+      return "曝光偏高";
+    }
+    return "曝光正常";
+  }
+
+  function createHistogramCompareInsight(beforeDistribution, afterDistribution) {
+    if (!beforeDistribution || !afterDistribution) {
+      return "先生成一张图并保存为 A，再选择第二张图完成对比。";
+    }
+
+    var beforeLabel = exposureLabel(beforeDistribution);
+    var afterLabel = exposureLabel(afterDistribution);
+    var delta = afterDistribution.averageGray - beforeDistribution.averageGray;
+    var direction = "亮度基本稳定";
+    if (delta > 8) {
+      direction = "整体变亮";
+    } else if (delta < -8) {
+      direction = "整体变暗";
+    }
+    return beforeLabel + " -> " + afterLabel + "，" + direction + "，平均灰度变化 " + delta.toFixed(1) + "。";
   }
 
   function createResultMetrics(result, histogramCanvas) {
@@ -333,6 +381,91 @@
     setCheckText(elements.comparisonPixelsText, consistency.checks.pixelCountConsistent);
     setCheckText(elements.comparisonNormalizedText, consistency.checks.normalizedConsistent);
     setCheckText(elements.comparisonFasterText, consistency.checks.currentFaster);
+  }
+
+  function drawCompareCanvas(canvas, normalizedBins) {
+    if (!canvas) {
+      return;
+    }
+    drawHistogram(canvas, normalizedBins || new Uint8Array(HISTOGRAM_WIDTH));
+  }
+
+  function createCompareSnapshot(result) {
+    if (!result || !result.metrics) {
+      return null;
+    }
+    return {
+      normalized: cloneNormalizedBins(result.normalized),
+      distribution: result.metrics.distribution,
+      width: result.width,
+      height: result.height,
+      elapsedMs: result.elapsedMs
+    };
+  }
+
+  function formatCompareLabel(snapshot, fallback) {
+    if (!snapshot) {
+      return fallback;
+    }
+    return snapshot.width + "x" + snapshot.height + " / " + formatElapsed(snapshot.elapsedMs) + "ms";
+  }
+
+  function updateComparePanel(elements) {
+    if (!elements.compareCanvasA || !elements.compareCanvasB || !elements.compareInsightText) {
+      return;
+    }
+
+    var beforeSnapshot = elements.compareSnapshotA;
+    var afterSnapshot = elements.currentResult && elements.currentResult !== elements.compareSnapshotSource
+      ? createCompareSnapshot(elements.currentResult)
+      : null;
+    var compareReady = Boolean(beforeSnapshot);
+    if (elements.comparePanel) {
+      elements.comparePanel.classList.toggle("is-ready", compareReady);
+    }
+    drawCompareCanvas(elements.compareCanvasA, beforeSnapshot && beforeSnapshot.normalized);
+    drawCompareCanvas(elements.compareCanvasB, compareReady && afterSnapshot && afterSnapshot.normalized);
+
+    if (elements.compareALabel) {
+      elements.compareALabel.textContent = formatCompareLabel(beforeSnapshot, "未保存");
+    }
+    if (elements.compareBLabel) {
+      elements.compareBLabel.textContent = formatCompareLabel(afterSnapshot, "等待第二张");
+    }
+
+    if (!beforeSnapshot) {
+      elements.compareInsightText.textContent = "先生成一张图并保存为 A，再选择第二张图完成对比。";
+      return;
+    }
+    if (!afterSnapshot) {
+      elements.compareInsightText.textContent = "A 已保存，继续选择第二张图作为 Histogram B。";
+      return;
+    }
+    elements.compareInsightText.textContent = createHistogramCompareInsight(beforeSnapshot.distribution, afterSnapshot.distribution);
+  }
+
+  function bindHistogramCompare(elements) {
+    if (elements.saveCompareButton) {
+      elements.saveCompareButton.addEventListener("click", function onSaveCompare() {
+        if (!elements.currentResult) {
+          showToast(elements, "请先生成一张直方图");
+          return;
+        }
+        elements.compareSnapshotA = createCompareSnapshot(elements.currentResult);
+        elements.compareSnapshotSource = elements.currentResult;
+        updateComparePanel(elements);
+        showToast(elements, "已保存为 Histogram A");
+      });
+    }
+
+    if (elements.clearCompareButton) {
+      elements.clearCompareButton.addEventListener("click", function onClearCompare() {
+        elements.compareSnapshotA = null;
+        elements.compareSnapshotSource = null;
+        updateComparePanel(elements);
+        showToast(elements, "对比已清空");
+      });
+    }
   }
 
   function copyCanvas(sourceCanvas, targetCanvas) {
@@ -602,15 +735,105 @@
     appendLog(elements, "RENDER: histogram canvas committed as " + HISTOGRAM_WIDTH + "x" + HISTOGRAM_HEIGHT + " black-white bitmap.");
   }
 
-  function setProcessing(elements, active, message, percent) {
+  function getProcessingStage(stageId) {
+    for (var index = 0; index < PROCESSING_STAGES.length; index += 1) {
+      if (PROCESSING_STAGES[index].id === stageId) {
+        return PROCESSING_STAGES[index];
+      }
+    }
+    return PROCESSING_STAGES[0];
+  }
+
+  function inferProcessingStage(percent) {
+    if (percent >= 100) {
+      return "done";
+    }
+    if (percent >= 82) {
+      return "render";
+    }
+    if (percent >= 68) {
+      return "normalize";
+    }
+    if (percent >= 40) {
+      return "compute";
+    }
+    return "scan";
+  }
+
+  function updateProcessingSteps(nodes, stageId, attributeName) {
+    if (!nodes) {
+      return;
+    }
+
+    var activeIndex = 0;
+    for (var index = 0; index < PROCESSING_STAGES.length; index += 1) {
+      if (PROCESSING_STAGES[index].id === stageId) {
+        activeIndex = index;
+        break;
+      }
+    }
+
+    for (var nodeIndex = 0; nodeIndex < nodes.length; nodeIndex += 1) {
+      var node = nodes[nodeIndex];
+      var nodeStage = node.getAttribute(attributeName);
+      var stepIndex = 0;
+      for (var stageIndex = 0; stageIndex < PROCESSING_STAGES.length; stageIndex += 1) {
+        if (PROCESSING_STAGES[stageIndex].id === nodeStage) {
+          stepIndex = stageIndex;
+          break;
+        }
+      }
+      node.classList.toggle("is-active", nodeStage === stageId);
+      node.classList.toggle("is-complete", stepIndex < activeIndex || stageId === "done");
+    }
+  }
+
+  function clearProcessingTimers(elements) {
+    if (!elements.processingTimers) {
+      return;
+    }
+    for (var index = 0; index < elements.processingTimers.length; index += 1) {
+      clearTimeout(elements.processingTimers[index]);
+    }
+    elements.processingTimers = [];
+  }
+
+  function runProcessingSequence(elements, steps) {
+    clearProcessingTimers(elements);
+    return new Promise(function sequence(resolve) {
+      var elapsed = 0;
+      for (var index = 0; index < steps.length; index += 1) {
+        elapsed += steps[index].delay;
+        (function scheduleStep(step, wait) {
+          elements.processingTimers.push(setTimeout(function updateStep() {
+            setProcessing(elements, true, step.message, step.percent, step.stage);
+          }, wait));
+        })(steps[index], elapsed);
+      }
+      elements.processingTimers.push(setTimeout(resolve, elapsed));
+    });
+  }
+
+  function setProcessing(elements, active, message, percent, stageId) {
     if (!elements.processingPanel || !elements.progressBar || !elements.processingLabel) {
       return;
     }
 
     var nextPercent = clamp(percent || 0, 0, 100);
+    var nextStageId = stageId || inferProcessingStage(nextPercent);
+    var stage = getProcessingStage(nextStageId);
     elements.processingPanel.hidden = !active;
-    elements.processingLabel.textContent = message || "正在处理";
+    elements.processingLabel.textContent = message || stage.label;
+    if (elements.processingDetail) {
+      elements.processingDetail.textContent = stage.detail;
+    }
     elements.progressBar.style.width = nextPercent + "%";
+    updateProcessingSteps(elements.processingSteps, active ? nextStageId : "scan", "data-processing-step");
+
+    if (!active) {
+      clearProcessingTimers(elements);
+      elements.progressBar.style.width = "0%";
+    }
 
     if (!elements.processingOverlay || !elements.processingOverlayBar || !elements.processingOverlayLabel || !elements.processingOverlayPercent) {
       return;
@@ -621,9 +844,13 @@
       elements.processingOverlayTimer = 0;
     }
 
-    elements.processingOverlayLabel.textContent = message || "正在处理";
+    elements.processingOverlayLabel.textContent = message || stage.label;
+    if (elements.processingOverlayDetail) {
+      elements.processingOverlayDetail.textContent = stage.detail;
+    }
     elements.processingOverlayPercent.textContent = Math.round(nextPercent) + "%";
     elements.processingOverlayBar.style.width = nextPercent + "%";
+    updateProcessingSteps(elements.processingOverlaySteps, active ? nextStageId : "scan", "data-processing-overlay-step");
 
     if (active) {
       elements.processingOverlay.hidden = false;
@@ -639,6 +866,9 @@
       elements.processingOverlay.classList.remove("is-leaving");
       elements.processingOverlayBar.style.width = "0%";
       elements.processingOverlayPercent.textContent = "0%";
+      if (elements.processingOverlayDetail) {
+        elements.processingOverlayDetail.textContent = PROCESSING_STAGES[0].detail;
+      }
     }, 260);
   }
 
@@ -751,12 +981,17 @@
       histogramCanvas: documentRef.getElementById("histogramCanvas"),
       processingPanel: documentRef.getElementById("processingPanel"),
       processingLabel: documentRef.getElementById("processingLabel"),
+      processingDetail: documentRef.getElementById("processingDetail"),
+      processingSteps: documentRef.querySelectorAll("[data-processing-step]"),
       progressBar: documentRef.getElementById("progressBar"),
       processingOverlay: documentRef.getElementById("processingOverlay"),
       processingOverlayLabel: documentRef.getElementById("processingOverlayLabel"),
+      processingOverlayDetail: documentRef.getElementById("processingOverlayDetail"),
       processingOverlayPercent: documentRef.getElementById("processingOverlayPercent"),
       processingOverlayBar: documentRef.getElementById("processingOverlayBar"),
+      processingOverlaySteps: documentRef.querySelectorAll("[data-processing-overlay-step]"),
       processingOverlayTimer: 0,
+      processingTimers: [],
       elapsedText: documentRef.getElementById("elapsedText"),
       binCountText: documentRef.getElementById("binCountText"),
       maxCountText: documentRef.getElementById("maxCountText"),
@@ -793,9 +1028,19 @@
       histogramZoomClose: documentRef.getElementById("histogramZoomClose"),
       histogramZoomSurface: documentRef.getElementById("histogramZoomSurface"),
       histogramZoomCanvas: documentRef.getElementById("histogramZoomCanvas"),
+      saveCompareButton: documentRef.getElementById("saveCompareButton"),
+      clearCompareButton: documentRef.getElementById("clearCompareButton"),
+      comparePanel: documentRef.getElementById("comparePanel"),
+      compareCanvasA: documentRef.getElementById("compareCanvasA"),
+      compareCanvasB: documentRef.getElementById("compareCanvasB"),
+      compareALabel: documentRef.getElementById("compareALabel"),
+      compareBLabel: documentRef.getElementById("compareBLabel"),
+      compareInsightText: documentRef.getElementById("compareInsightText"),
       saveConfirmDialog: documentRef.getElementById("saveConfirmDialog"),
       saveConfirmCancel: documentRef.getElementById("saveConfirmCancel"),
       saveConfirmAccept: documentRef.getElementById("saveConfirmAccept"),
+      compareSnapshotA: null,
+      compareSnapshotSource: null,
       currentImage: null,
       currentResult: null
     };
@@ -807,8 +1052,10 @@
     bindInputModality(documentRef);
     bindNavigation(documentRef, elements);
     bindHistogramZoom(documentRef, elements);
+    bindHistogramCompare(elements);
     runSplash(elements);
     drawHistogram(elements.histogramCanvas, new Uint8Array(HISTOGRAM_WIDTH));
+    updateComparePanel(elements);
     appendBootLogs(elements);
 
     var currentObjectUrl = "";
@@ -830,7 +1077,8 @@
       appendLog(elements, describeFile(file));
       appendLog(elements, "QUEUE: accepted local image file, object URL decode requested.");
       setStatus(elements, "正在处理图片", "");
-      setProcessing(elements, true, "正在载入图片", 24);
+      clearProcessingTimers(elements);
+      setProcessing(elements, true, "扫描像素", 16, "scan");
       loadImageFromFile(file)
         .then(function handleLoaded(payload) {
           if (currentObjectUrl) {
@@ -845,13 +1093,17 @@
 
           appendImageDecodedLogs(elements, payload.image);
           setStatus(elements, "图片已载入，正在生成直方图", "");
-          setProcessing(elements, true, "读取像素与统计 bins", 62);
-          return afterPaint(function runHistogram() {
-            appendComputeStartLogs(elements);
-            var result = generateHistogram(payload.image, elements.sourceCanvas, elements.histogramCanvas);
-            return {
-              result: result
-            };
+          return runProcessingSequence(elements, [
+            { delay: 120, stage: "scan", message: "扫描像素", percent: 28 },
+            { delay: 260, stage: "compute", message: "统计直方图", percent: 56 }
+          ]).then(function runHistogramAfterIntro() {
+            return afterPaint(function runHistogram() {
+              appendComputeStartLogs(elements);
+              var result = generateHistogram(payload.image, elements.sourceCanvas, elements.histogramCanvas);
+              return {
+                result: result
+              };
+            });
           });
         })
         .then(function handleResult(payload) {
@@ -863,13 +1115,19 @@
           elements.maxCountText.textContent = String(result.maxCount);
           elements.pixelCountText.textContent = String(result.pixelCount);
           updateMetricsPanels(elements, result);
-          setProcessing(elements, true, "直方图生成完成", 100);
-          setStatus(elements, "结果已更新，可继续选择图片", "success");
-          appendResultLogs(elements, result);
-          showToast(elements, "直方图生成完成");
-          setTimeout(function hideProcessing() {
-            setProcessing(elements, false, "", 0);
-          }, 420);
+          updateComparePanel(elements);
+          return runProcessingSequence(elements, [
+            { delay: 180, stage: "normalize", message: "归一化", percent: 74 },
+            { delay: 220, stage: "render", message: "渲染输出", percent: 92 },
+            { delay: 180, stage: "done", message: "完成", percent: 100 }
+          ]).then(function finishProcessing() {
+            setStatus(elements, "结果已更新，可继续选择图片", "success");
+            appendResultLogs(elements, result);
+            showToast(elements, "直方图生成完成");
+            elements.processingTimers.push(setTimeout(function hideProcessing() {
+              setProcessing(elements, false, "", 0);
+            }, 520));
+          });
         })
         .catch(function handleError(error) {
           setProcessing(elements, false, "", 0);
@@ -892,6 +1150,8 @@
     maxBinCount: maxBinCount,
     normalizedBinsInRange: normalizedBinsInRange,
     analyzeGrayDistribution: analyzeGrayDistribution,
+    exposureLabel: exposureLabel,
+    createHistogramCompareInsight: createHistogramCompareInsight,
     createConsistencyComparison: createConsistencyComparison,
     createResultMetrics: createResultMetrics,
     drawHistogram: drawHistogram,

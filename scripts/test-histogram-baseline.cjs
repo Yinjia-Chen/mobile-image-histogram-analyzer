@@ -30,6 +30,11 @@ assert.deepStrictEqual(
   optimizedDistribution,
   "baseline distribution analysis must match optimized analysis for identical bins"
 );
+assert.strictEqual(
+  baseline.createHistogramCompareInsight(baselineDistribution, optimizedDistribution),
+  optimized.createHistogramCompareInsight(optimizedDistribution, baselineDistribution),
+  "baseline and optimized compare helpers keep the same wording for identical distributions"
+);
 assert.strictEqual(baseline.normalizedBinsInRange(baselineNormalized), true, "baseline normalized bins stay in 0..100");
 
 const baselineConsistency = baseline.createConsistencyComparison(
