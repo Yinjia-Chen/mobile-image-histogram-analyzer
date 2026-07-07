@@ -4,7 +4,7 @@
 
 本文档用于把“移动端图像直方图分析系统”的需求拆分为可执行任务，并记录每个任务的推进状态。后续每次完成任务、任务范围发生变化、或遇到阻塞时，都必须同步更新本文档。
 
-最后更新日期：2026-07-06
+最后更新日期：2026-07-07
 
 ## 2. 状态规则
 
@@ -30,7 +30,7 @@
 | --- | --- | --- | --- | --- | --- |
 | T-01 | 选题与技术路线决策 | 项目准备 | `done` | 无 | 明确采用官方课题 1、Android WebView 壳 App + H5 Canvas、离线 APK 路线 |
 | T-02 | 仓库与推送身份配置 | 项目准备 | `done` | T-01 | GitHub 仓库可推送，提交身份使用本项目单独配置 |
-| T-03 | 项目 README 整理 | 项目准备 | `done` | T-01 | README 说明项目背景、范围、技术路线、文档索引和当前进度 |
+| T-03 | 项目 README 整理 | 项目准备 | `done` | T-01 | README 已升级为答辩展示优先版，包含首屏截图、30 秒速览、视觉系统、项目亮点、架构、算法、性能对照、APK 产物和证据索引 |
 | T-04 | 项目选题报告 | 文档产物 | `done` | T-01 | 完成项目背景、功能说明、技术路线和选题理由 |
 | T-05 | 需求分析报告 | 文档产物 | `done` | T-04 | 明确功能需求、非功能需求、数据需求、验收标准和范围边界 |
 | T-06 | 概要设计文档 | 文档产物 | `done` | T-05 | 明确总体架构、模块划分、主流程、数据结构和部署方式 |
@@ -54,7 +54,7 @@
 | T-24 | APK 打包与安装验证 | 测试验收 | `blocked` | T-21 | 已生成可安装 debug APK：`dist/mobile-histogram-stage4-debug.apk`，构建与包内容证据见 `docs/测试/stage4-apk-handoff.md`；安装验证由用户在手机上执行，等待回填手机型号、Android 版本、安装启动结果、截图和问题记录 |
 | T-25 | 测试计划与测试报告 | 文档产物 | `todo` | T-21、T-22、T-23、T-24 | 输出测试范围、测试用例、执行结果、问题记录和结论 |
 | T-26 | 使用说明 | 文档产物 | `todo` | T-24 | 说明 APK 安装、启动、选图、查看直方图和注意事项 |
-| T-27 | 性能优化方案与记录 | 后续优化 | `doing` | T-21、T-23 | 正在改为性能对照实验与证据固化：新增低效 baseline 页面、benchmark，并通过 Android product flavors 输出可并装 APK；已完成视觉升级、launcher 图标和 loading 状态，最新 APK 见 `dist/mobile-histogram-baseline-coinstall-debug.apk` 与 `dist/mobile-histogram-optimized-coinstall-debug.apk` |
+| T-27 | 性能优化方案与记录 | 后续优化 | `doing` | T-21、T-23 | 正在改为性能对照实验与证据固化：新增低效 baseline 页面、benchmark，并通过 Android product flavors 输出可并装 APK；已重新打包包含最新 UI、Histogram Compare、loading、架构图和 flavor 专属 launcher 角标的优化前/优化后 APK |
 | T-28 | 答辩 PPT 与演示脚本 | 课程验收 | `todo` | T-24、T-25、T-26 | 准备可重复演示路径、功能说明、算法解释和测试结论 |
 | T-29 | 课程思政报告 | 课程验收 | `todo` | T-04 | 按课程要求补充思政相关材料 |
 | T-30 | 最终交付检查 | 课程验收 | `todo` | T-24 至 T-29 | 检查源码、APK、文档、测试记录和答辩材料是否完整 |
@@ -160,3 +160,14 @@
 | 2026-07-06 | 重新打包优化前/优化后两份可并装 debug APK，已包含验收辅助与灰度分布规则解释模块，并更新阶段 5 APK 哈希证据。 |
 | 2026-07-06 | 补齐结果一致性校验模块：指标页展示低效压力对照耗时、当前实现耗时、结果一致性和 bins/像素/归一化/耗时对照检查；该模块使用已有 benchmark 证据和本次生成结果，不改变核心算法。 |
 | 2026-07-06 | 重新打包优化前/优化后两份可并装 debug APK，已包含结果一致性校验模块，并更新阶段 5 APK 大小与 SHA256 证据。 |
+| 2026-07-07 | 升级 README 为答辩展示优先版：新增当前优化版界面截图 `docs/assets/readme-mobile-histogram-console.png`，重排首屏速览、项目亮点、演示路径、算法、架构、性能对照、APK 产物和文档索引；T-03 保持 `done` 并补充最新完成说明。 |
+| 2026-07-07 | 同步 Android launcher 图标与开屏动画风格：`ic_launcher_histogram.xml` 改为黑紫底、紫粉青三柱发光直方图，与 H5 开屏 `.splash-mark` 保持同色系；未改变 WebView 入口、离线能力或直方图算法。 |
+| 2026-07-07 | 升级生成中 loading 观感：优化版与 baseline H5 均新增 Scanning Pixels、Calculating Histogram、Normalizing、Rendering、Done 分阶段演出、微型直方图波形和全屏进度矩阵；动画由 `setTimeout` 驱动，不改变真实 `generateHistogram` 计时边界、灰度公式、256 bins 或 `256x100` 输出。 |
+| 2026-07-07 | 升级链路页架构图：将原 4 步列表改为 Android Shell / H5 Canvas / Algorithm Core / Result Layer 分层架构图，并展示 Image、Decode、Gray、Histogram、Normalize、Canvas、Analysis 主链路与公式、256 bins、`256x100` 输出锚点；仅改 H5 源码，不打包 APK。 |
+| 2026-07-07 | 新增 Histogram Compare 展示功能：结果页支持保存当前直方图为 Histogram A，后续生成结果作为 Histogram B 上下排列对比，并基于平均灰度与暗/亮区间占比输出曝光变化一句话；复用现有 normalized bins 和 `256x100` Canvas 绘制，不改变核心算法，暂不打包 APK。 |
+| 2026-07-07 | 统一 H5 产品视觉系统：新增集中式字体、圆角、间距、配色、阴影、动效和图标尺寸 token，收口顶部栏、底部 tab、按钮、卡片、架构图、loading、对比面板与保存弹窗观感；仅改源码，不打包 APK。 |
+| 2026-07-07 | 按 README 整理、UI 再磨、图标统一、动画自然四项继续收口：README 增加 30 秒速览和视觉系统说明；CSS 统一 tab/按钮图标反馈和开屏、页面切换、processing 动效节奏；当时仅改源码和文档，暂不打包 APK。 |
+| 2026-07-07 | 为优化前/优化后两个 APK 增加 flavor 专属 launcher 角标资源：baseline 右下角橙色回退/对照标识，optimized 右下角紫青完成/优化标识；初次仅新增 Android 资源源码，不打包 APK，后续重新打包时资源合并与 APK 构建已通过。 |
+| 2026-07-07 | 按用户确认重新打包优化前/优化后两份可并装 debug APK，输出至 `dist/mobile-histogram-baseline-coinstall-debug.apk` 与 `dist/mobile-histogram-optimized-coinstall-debug.apk`；已包含最新 UI、README 口径、Histogram Compare、loading、架构图和 flavor 专属 launcher 角标，并更新阶段 5 APK 大小与 SHA256 证据。 |
+| 2026-07-07 | 根据真机截图反馈收敛优化版 loading 与结果页：全屏进度由长条和微型直方图矩阵改为紧凑进度线与短阶段标签；Histogram Compare 默认收起，保存 A 后才展示 A/B 对比，避免生成单图时出现重复直方图；已重新打包优化前/优化后两份可并装 APK 并更新阶段 5 哈希证据。 |
+| 2026-07-07 | 根据用户继续反馈将生成中 loading 改为单行响应式状态条：移除 overlay 点阵和阶段胶囊，宽屏保留阶段说明，窄屏自动隐藏说明，极窄屏隐藏 PROCESSING 标签；不改变计时边界、灰度公式、256 bins 或 `256x100` 输出，并重新打包两份可并装 APK。 |

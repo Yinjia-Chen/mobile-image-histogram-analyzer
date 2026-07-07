@@ -105,8 +105,8 @@ APK 信息：
 
 | APK | 路径 | 包名 | versionName | 大小 | SHA256 |
 | --- | --- | --- | --- | ---: | --- |
-| 优化前 | `dist/mobile-histogram-baseline-coinstall-debug.apk` | `com.framia.mobilehistogram.baseline` | `0.1.0-baseline` | 62,876 bytes | `d3030835bd198a293dd074d026627741944802e9e560208d058b415a7544f543` |
-| 优化后 | `dist/mobile-histogram-optimized-coinstall-debug.apk` | `com.framia.mobilehistogram.optimized` | `0.1.0-optimized` | 61,396 bytes | `e29220d1571579e57fbfdba1e50b051a50dbfb633e1cc5dfc7dd2efc9a0a3f4e` |
+| 优化前 | `dist/mobile-histogram-baseline-coinstall-debug.apk` | `com.framia.mobilehistogram.baseline` | `0.1.0-baseline` | 81,403 bytes | `9eec188ad666628a0c07c0b9af85c0e39fd52f381a3de68601512be474b1af5b` |
+| 优化后 | `dist/mobile-histogram-optimized-coinstall-debug.apk` | `com.framia.mobilehistogram.optimized` | `0.1.0-optimized` | 76,433 bytes | `d4d95b605362e8cf28654e1e8f26d7e886eb84b18967078b7f1aef69ffb4ab70` |
 
 APK 内包含：
 
@@ -130,7 +130,7 @@ optimized APK dex: file:///android_asset/index.html
 ```bash
 npm run test:baseline
 npm run harness:verify
-JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ANDROID_HOME="$HOME/Library/Android/sdk" ./gradlew assembleBaselineDebug assembleOptimizedDebug
+JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" ANDROID_HOME="$HOME/Library/Android/sdk" ./gradlew --offline assembleBaselineDebug assembleOptimizedDebug
 ```
 
 结果：
@@ -146,7 +146,7 @@ BUILD SUCCESSFUL
 本阶段在不改变核心算法和离线范围的前提下，补充了更接近原生 App 的视觉体验：
 
 - 新增 Android launcher 图标 `res/drawable/ic_launcher_histogram.xml`；
-- 优化前/优化后 APK 保持不同应用名和不同包名，可在同一手机并排安装；
+- 优化前/优化后 APK 保持不同应用名、不同包名和不同 launcher 右下角角标，可在同一手机并排安装；
 - H5 页面新增品牌头、模式标识、图片空状态、开屏直方图波动动画、全屏生成进度条、完成 toast 和处理终端；
 - H5 页面由单页瀑布改为 `接入 / 链路 / 输出 / 指标 / 协议 / 日志` 多视图跳转结构；
 - 指标和协议卡片补充小字注释，用于解释灰度桶、最大计数、像素总数、公式、通道、归一化和输出画布含义；
@@ -156,6 +156,7 @@ BUILD SUCCESSFUL
 - 移动端顶部增加 Android WebView 状态栏安全区，并压缩顶部控制台高度，避免状态栏遮挡首屏头部内容；
 - 优化前和优化后共享同一套视觉系统，但保留不同模式标签；
 - 图片处理流程增加载入、统计、完成的状态反馈。
+- 2026-07-07 重新打包已包含 README/UI 收口、Histogram Compare、分层架构图、自然 loading 动画和 flavor 专属 launcher 角标。
 
 本次视觉升级未改变：
 
