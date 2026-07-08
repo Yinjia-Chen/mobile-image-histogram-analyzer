@@ -82,8 +82,8 @@ selection, and Android-specific acceptance behavior.
 
 ### Performance Evidence
 
-Owns timing boundaries, benchmark design, baseline/optimized comparison, and
-defense-ready performance tables.
+Owns timing boundaries, benchmark design, low-efficiency control/current
+optimized comparison, and defense-ready performance tables.
 
 ### Course Docs
 

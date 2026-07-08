@@ -19,7 +19,7 @@
 -> 显示生成耗时
 ```
 
-当前仓库已经输出优化前 / 优化后两份可并装 APK。性能优化以同边界 baseline/optimized 对照方式固化，不改变灰度公式、256 bin 统计、`0-100` 归一化或 `256x100` 输出规则。Android 真机耗时、截图和设备信息仍按测试文档要求回填。
+当前仓库已经输出低效压力对照版本 / 正式演示版本两份可并装 APK。性能优化以低效对照版本与当前优化版本同边界对照方式固化，不改变灰度公式、256 bin 统计、`0-100` 归一化或 `256x100` 输出规则。Android 真机耗时、截图和设备信息仍按测试文档要求回填。
 
 ## 2. 技术边界
 
@@ -69,7 +69,7 @@
 - H5 文件直接放在 `app/src/main/assets/` 中，减少构建链路，保证 APK 离线运行。
 - 本地浏览器预览通过 `npm run preview` 启动，只用于调试 UI 和截图；正式交付仍以 APK 为准。
 - 当前不引入前端框架，优先使用原生 HTML、CSS、JavaScript 和 Canvas。
-- Android product flavors 区分 baseline 与 optimized，保证两份 APK 可并装、可对比。
+- Android product flavors 区分低效压力对照版本与正式演示版本，保证两份 APK 可并装、可对比。
 
 ## 4. Android 壳层设计
 
@@ -236,7 +236,7 @@ grayBin > 255 -> 255
 
 ### 7.2 统计
 
-统计数组固定为 256 个元素。当前优化版使用 `Uint32Array(256)`，降低普通数组和对象分配开销：
+统计数组固定为 256 个元素。当前优化版本使用 `Uint32Array(256)`，降低普通数组和对象分配开销：
 
 ```js
 const bins = new Uint32Array(256);
@@ -294,7 +294,7 @@ normalized[i] = round(bins[i] / maxCount * 100)
 
 | 模块 | 当前实现 |
 | --- | --- |
-| 页面入口 | `index.html` 为优化版入口，`index-baseline.html` 为低效对照入口 |
+| 页面入口 | `index.html` 为正式演示版本入口，`index-baseline.html` 为低效对照入口 |
 | 主逻辑 | `app.js` 负责图片加载、Canvas 处理、灰度统计、归一化、绘制、指标和日志 |
 | baseline 逻辑 | `baseline-app.js` 使用低效路径构造对照，不作为正式产品入口 |
 | 样式系统 | `style.css` 统一黑紫控制台视觉、移动端 tab、loading、弹窗和结果展示 |
@@ -303,10 +303,10 @@ normalized[i] = round(bins[i] / maxCount * 100)
 
 ### 8.3 Flavor 与 APK
 
-| Flavor | 包名 | 应用名 | 入口 | 用途 |
+| Flavor | 包名 | 说明口径 | 入口 | 用途 |
 | --- | --- | --- | --- | --- |
-| `baselineDebug` | `com.framia.mobilehistogram.baseline` | `直方图分析-优化前` | `index-baseline.html` | 性能压力对照 |
-| `optimizedDebug` | `com.framia.mobilehistogram.optimized` | `直方图分析-优化后` | `index.html` | 正式演示版本 |
+| `baselineDebug` | `com.framia.mobilehistogram.baseline` | 低效压力对照版本 | `index-baseline.html` | 性能压力对照 |
+| `optimizedDebug` | `com.framia.mobilehistogram.optimized` | 正式演示版本 | `index.html` | 当前优化版本主演示 |
 
 ## 9. 性能设计
 
@@ -327,8 +327,8 @@ Canvas 像素读取
 | TypedArray | 使用 `Uint32Array(256)` 统计灰度值 |
 | 单次遍历 | 一次遍历 RGBA 数据完成灰度计算和 bin 计数 |
 | 固定输出 | 结果绘制固定为 `256x100`，不随原图尺寸扩大 |
-| 对照实现 | baseline 页面保留低效对象分配、重复计算和重复扫描，便于说明优化价值 |
-| 结果一致性 | baseline 与 optimized 必须输出一致 bins、归一化和渲染缓冲区 |
+| 对照实现 | 低效对照页面保留低效对象分配、重复计算和重复扫描，便于说明优化价值 |
+| 结果一致性 | 低效对照版本与当前优化版本必须输出一致 bins、归一化和渲染缓冲区 |
 
 开发机 benchmark 已记录在 `docs/测试人员/stage5-performance-comparison.md`。该数据用于说明实现策略差异，不替代 Android 真机测试。
 
@@ -360,7 +360,7 @@ ANDROID_HOME="/Users/framia/Library/Android/sdk" \
 | 真机数据 | 机型、Android 版本、截图和实际耗时仍需测试人员回填 |
 | 图片尺寸 | 超大图片可能受手机性能和 WebView 内存影响，答辩优先使用准备好的中等尺寸图片 |
 | 保存图片 | 长按保存是增强功能，不作为核心验收路径 |
-| baseline | baseline 是压力对照实现，不代表历史生产版本 |
+| 低效对照版本 | 低效对照版本是压力对照实现，不代表历史生产版本 |
 | 网络 | 核心功能不依赖网络，不能用远程图片作为验收输入 |
 
 ## 12. 小结

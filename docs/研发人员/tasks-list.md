@@ -37,9 +37,9 @@
 | T-07 | 技术设计文档 | 研发设计 | `done` | T-06 | 已将 `docs/研发人员/tech-design.md` 升级为当前实现口径，覆盖 Android 壳层、H5 页面、算法、性能、flavor、验证命令和已知边界 |
 | T-08 | PRD 评审记录 | 研发设计 | `done` | T-05 | 已重写 `docs/研发人员/prd-review.md`，记录需求实现性、范围边界、技术方案、风险和验收口径评审结论 |
 | T-09 | 研发任务清单 | 协作管理 | `done` | T-05、T-06、T-07 | 已完成任务拆分，并在 `AGENTS.md` 与 harness 校验中约束后续状态更新 |
-| T-10 | Android 项目骨架搭建 | 主流程实现 | `done` | T-07 | 已创建 Android 工程骨架，包含 `MainActivity`、`AndroidManifest.xml`、资源目录和 Gradle 构建配置；`./gradlew --offline assembleDebug` 构建成功，证据见 `docs/测试/stage1-apk-build-evidence.md` |
+| T-10 | Android 项目骨架搭建 | 主流程实现 | `done` | T-07 | 已创建 Android 工程骨架，包含 `MainActivity`、`AndroidManifest.xml`、资源目录和 Gradle 构建配置；`./gradlew --offline assembleDebug` 构建成功，证据见 `docs/测试人员/stage1-apk-build-evidence.md` |
 | T-11 | WebView 本地页面加载 | 主流程实现 | `done` | T-10 | `MainActivity` 加载 `file:///android_asset/index.html`，APK 内已打包 `assets/index.html`；debug APK 已输出到 `dist/mobile-histogram-stage1-debug.apk`，真机安装验证后续并入 T-21/T-24 |
-| T-12 | H5 页面基础结构 | 主流程实现 | `done` | T-11 | 已完成页面结构，包含选图入口、预览区、直方图区、耗时、状态和统计信息区域；证据见 `docs/测试/stage2-histogram-main-flow-evidence.md` |
+| T-12 | H5 页面基础结构 | 主流程实现 | `done` | T-11 | 已完成页面结构，包含选图入口、预览区、直方图区、耗时、状态和统计信息区域；证据见 `docs/测试人员/stage2-histogram-main-flow-evidence.md` |
 | T-13 | 本地图片选择与预览 | 主流程实现 | `done` | T-11、T-12 | 已实现 H5 `image/*` 文件选择和 Android WebView 文件选择回调，选图后显示原图预览；真机验收并入 T-21/T-24 |
 | T-14 | Canvas 像素读取 | 主流程实现 | `done` | T-13 | 已将图片按原始尺寸绘制到隐藏处理 Canvas，并通过 `getImageData` 读取 RGBA 像素数据 |
 | T-15 | 灰度化计算 | 主流程实现 | `done` | T-14 | 已使用 `gray = red * 0.299 + green * 0.587 + blue * 0.114` 和 `Math.round` 取整规则计算灰度 bin，并通过 fixture 测试 |
@@ -48,18 +48,18 @@
 | T-18 | 256x100 黑白直方图绘制 | 主流程实现 | `done` | T-17 | 已固定直方图 Canvas 源尺寸为 `256x100` 并逐列绘制黑白结果，fixture 验证绘制尺寸和底部向上绘制规则 |
 | T-19 | 生成耗时展示 | 主流程实现 | `done` | T-14、T-18 | 已展示本次处理耗时，计时范围覆盖 Canvas 绘制、像素读取、灰度统计、归一化和直方图绘制 |
 | T-20 | 异常提示与重新选择 | 主流程实现 | `done` | T-13、T-18 | 已处理取消选择、非图片文件、图片读取失败和处理失败提示，并在每次选择后允许重新选择 |
-| T-21 | 主流程离线自测 | 测试验收 | `done` | T-10 至 T-20 | 已补充本地 H5 加载截图、APK assets 离线边界检查和无远程依赖测试，证据见 `docs/测试/stage3-algorithm-offline-self-test.md`；用户于 2026-07-06 反馈断网测试通过 |
+| T-21 | 主流程离线自测 | 测试验收 | `done` | T-10 至 T-20 | 已补充本地 H5 加载截图、APK assets 离线边界检查和无远程依赖测试，证据见 `docs/测试人员/stage3-algorithm-offline-self-test.md`；用户于 2026-07-06 反馈断网测试通过 |
 | T-22 | 算法准确性测试 | 测试验收 | `done` | T-15 至 T-18 | 已新增并扩展 `scripts/test-histogram-algorithm.cjs` 与 `scripts/test-histogram-main-flow.cjs`，覆盖灰度公式、256 bin 总数、主流程像素读取、归一化和 `256x100` 绘制规则；`npm run test:histogram` 通过 |
 | T-23 | 基础耗时记录 | 测试验收 | `todo` | T-19、T-21 | 记录测试设备、图片尺寸、处理耗时和已知限制 |
-| T-24 | APK 打包与安装验证 | 测试验收 | `blocked` | T-21 | 已生成可安装 debug APK：`dist/mobile-histogram-stage4-debug.apk`，构建与包内容证据见 `docs/测试/stage4-apk-handoff.md`；安装验证由用户在手机上执行，等待回填手机型号、Android 版本、安装启动结果、截图和问题记录 |
+| T-24 | APK 打包与安装验证 | 测试验收 | `blocked` | T-21 | 已生成可安装 debug APK：`dist/mobile-histogram-stage4-debug.apk`，构建与包内容证据见 `docs/测试人员/stage4-apk-handoff.md`；安装验证由用户在手机上执行，等待回填手机型号、Android 版本、安装启动结果、截图和问题记录 |
 | T-25 | 测试计划与测试报告 | 文档产物 | `done` | T-21、T-22、T-23、T-24 | 已在 `docs/测试人员/` 补齐测试计划、测试用例、用例执行情况和测试报告；文档区分研发自测与验收测试，并明确真机机型、截图和耗时仍由 T-23/T-24 回填 |
-| T-26 | 使用说明 | 文档产物 | `done` | T-24 | 已新增 `docs/需求分析师/使用说明.md`，说明 APK 安装、启动、选图、查看直方图、指标页、优化前后对比和常见问题；最终真机截图与耗时仍可在测试报告中补充 |
-| T-27 | 性能优化方案与记录 | 后续优化 | `doing` | T-21、T-23 | 正在改为性能对照实验与证据固化：新增低效 baseline 页面、benchmark，并通过 Android product flavors 输出可并装 APK；已重新打包包含最新 UI、Histogram Compare、loading、架构图和 flavor 专属 launcher 角标的优化前/优化后 APK |
+| T-26 | 使用说明 | 文档产物 | `done` | T-24 | 已新增 `docs/需求分析师/使用说明.md`，说明 APK 安装、启动、选图、查看直方图、指标页、低效对照与当前优化对比和常见问题；最终真机截图与耗时仍可在测试报告中补充 |
+| T-27 | 性能优化方案与记录 | 后续优化 | `done` | T-21、T-23 | 已固化低效对照版本与当前优化版本的同边界性能对照：包含低效对照页面、benchmark、两份可并装 APK、输出一致性测试和性能证据；Android 真机耗时仍由 T-23/T-24 回填 |
 | T-28 | 答辩 PPT 与演示脚本 | 课程验收 | `todo` | T-24、T-25、T-26 | 准备可重复演示路径、功能说明、算法解释和测试结论 |
 | T-29 | 课程思政报告 | 课程验收 | `todo` | T-04 | 按课程要求补充思政相关材料 |
 | T-30 | 最终交付检查 | 课程验收 | `todo` | T-24 至 T-29 | 检查源码、APK、文档、测试记录和答辩材料是否完整 |
 | T-31 | 项目自定义 subagents 配置 | 协作管理 | `done` | T-09 | 已在 `.codex/agents/` 建立项目级自定义 agents，并提供 README 调度说明；通过 `npm run harness:verify` 验证 |
-| T-32 | 核心源码注释比例核查 | 课程验收 | `done` | T-10 至 T-22 | 已将 `app/src` 下 JS、Java、CSS、HTML、XML 源码/资源代码补充为中文分段注释，避免集中堆在文件顶部；`npm run check:source-comments` 校验 14 个 `app/src` 文件均有注释，优化版核心源码注释/代码比为 `392/1172 = 0.334`，高于三分之一，且已接入 `npm run harness:verify` |
+| T-32 | 核心源码注释比例核查 | 课程验收 | `done` | T-10 至 T-22 | 已将 `app/src` 下 JS、Java、CSS、HTML、XML 源码/资源代码补充为中文分段注释，避免集中堆在文件顶部；`npm run check:source-comments` 校验 14 个 `app/src` 文件均有注释，当前优化版本核心源码注释/代码比为 `392/1172 = 0.334`，高于三分之一，且已接入 `npm run harness:verify` |
 | T-33 | 项目经理文档补齐 | 文档产物 | `done` | T-04 至 T-32 | 已在 `docs/项目经理/` 补齐项目计划、进度跟踪表和风险识别表；文档按五天完成口径整理，区分已完成、待补齐和待回填事项 |
 | T-34 | 需求分析师文档补齐 | 文档产物 | `done` | T-04 至 T-33 | 已在 `docs/需求分析师/` 补齐需求规格说明书、设计文档、使用说明和关键技术调研报告；文档围绕离线 Android WebView APK、H5 Canvas、灰度公式、`256x100` 输出、耗时展示和性能对照整理 |
 | T-35 | 测试人员文档补齐 | 文档产物 | `done` | T-21、T-22、T-25、T-34 | 已在 `docs/测试人员/` 新增测试计划、测试用例、用例执行情况和测试报告，按研发自测与验收测试两条线整理脚本证据、APK 证据、待回填真机项和测试结论 |
@@ -145,43 +145,44 @@
 | --- | --- |
 | 2026-07-06 | 新增研发任务清单，完成需求拆分，并将 T-09 标记为 `done`；后续完成或阻塞任务时必须同步更新本文件。 |
 | 2026-07-06 | 新增项目级自定义 subagents 配置任务 T-31，完成需求守门、移动壳、H5 算法、性能证据、验收测试、课程文档 6 个 agent 定义与调度说明。 |
-| 2026-07-06 | 完成第 1 阶段最小 Android WebView APK：T-10、T-11 标记为 `done`，debug APK 输出至 `dist/mobile-histogram-stage1-debug.apk`，构建证据记录于 `docs/测试/stage1-apk-build-evidence.md`。 |
-| 2026-07-06 | 完成第 2 阶段 H5 直方图主流程：T-12 至 T-20、T-22 标记为 `done`，debug APK 输出至 `dist/mobile-histogram-stage2-debug.apk`，证据记录于 `docs/测试/stage2-histogram-main-flow-evidence.md`。 |
+| 2026-07-06 | 完成第 1 阶段最小 Android WebView APK：T-10、T-11 标记为 `done`，debug APK 输出至 `dist/mobile-histogram-stage1-debug.apk`，构建证据记录于 `docs/测试人员/stage1-apk-build-evidence.md`。 |
+| 2026-07-06 | 完成第 2 阶段 H5 直方图主流程：T-12 至 T-20、T-22 标记为 `done`，debug APK 输出至 `dist/mobile-histogram-stage2-debug.apk`，证据记录于 `docs/测试人员/stage2-histogram-main-flow-evidence.md`。 |
 | 2026-07-06 | 补充第 3 阶段算法测试和离线自测证据：新增主流程 fake Canvas 测试、APK/H5 离线资源检查和本地 H5 加载截图；T-21 标记为 `blocked`，等待手机断网选图运行证据。 |
 | 2026-07-06 | 根据用户反馈将 T-21 更新为 `done`；完成第 4 阶段 APK 打包，输出 `dist/mobile-histogram-stage4-debug.apk`，T-24 标记为 `blocked` 等待用户手机安装验证回填。 |
-| 2026-07-06 | 开始第 5 阶段性能对照实验：新增低效对照 benchmark、H5 baseline 页面和 Android product flavors，输出优化前/优化后两份可并装 APK 供手机安装对比测试，待用户确认后再固化提交。 |
-| 2026-07-06 | 对优化前/优化后双 APK 做视觉体验升级：新增 launcher 图标、原生感页面布局、模式标识、处理进度条和状态反馈，并重新输出两份可并装 APK。 |
+| 2026-07-06 | 开始第 5 阶段性能对照实验：新增低效对照 benchmark、H5 低效对照页面和 Android product flavors，输出低效压力对照版本/正式演示版本两份可并装 APK 供手机安装对比测试，待用户确认后再固化提交。 |
+| 2026-07-06 | 对低效压力对照版本/正式演示版本双 APK 做视觉体验升级：新增 launcher 图标、原生感页面布局、模式标识、处理进度条和状态反馈，并重新输出两份可并装 APK。 |
 | 2026-07-06 | 继续增强答辩演示界面：新增本地浏览器预览脚本、多页面底部导航、toast 完成提示、独立日志 tab 和黑紫工程控制台主题；T-28 仍保持 `todo`，待后续补齐 PPT 与演示脚本。 |
 | 2026-07-06 | 优化移动端 tab 信息密度：将接入、链路、输出、指标、协议、日志拆成 6 个轻量页面，并用 360x740 与 390x844 浏览器视口验证当前 tab 无整页滚动。 |
-| 2026-07-06 | 新增 1.5s 左右开屏直方图波动动画，同步优化前/优化后 H5 入口；动画为启动展示层，不替代真实 `256x100` 直方图计算结果。 |
+| 2026-07-06 | 新增 1.5s 左右开屏直方图波动动画，同步低效压力对照版本/正式演示版本 H5 入口；动画为启动展示层，不替代真实 `256x100` 直方图计算结果。 |
 | 2026-07-06 | 增强终端日志技术信息：启动、选图、解码、Canvas 读取、灰度公式、bin 统计、归一化、渲染和性能计时边界均输出结构化日志，便于答辩讲解。 |
-| 2026-07-06 | 将生成中的 loading 升级为全屏覆盖进度条，同步优化前/优化后入口；仍由真实处理阶段的 `setProcessing` 状态驱动，不改变算法和计时边界。 |
+| 2026-07-06 | 将生成中的 loading 升级为全屏覆盖进度条，同步低效压力对照版本/正式演示版本入口；仍由真实处理阶段的 `setProcessing` 状态驱动，不改变算法和计时边界。 |
 | 2026-07-06 | 为指标和协议卡片补充小字注释，解释灰度桶、最大计数、像素总数、公式、通道、归一化和输出画布含义，并验证移动端指标/协议页无整页滚动。 |
-| 2026-07-06 | 重新打包优化前/优化后两份可并装 debug APK，输出至 `dist/mobile-histogram-baseline-coinstall-debug.apk` 与 `dist/mobile-histogram-optimized-coinstall-debug.apk`，并更新阶段 5 APK 哈希证据。 |
+| 2026-07-06 | 重新打包低效压力对照版本/正式演示版本两份可并装 debug APK，输出至 `dist/mobile-histogram-baseline-coinstall-debug.apk` 与 `dist/mobile-histogram-optimized-coinstall-debug.apk`，并更新阶段 5 APK 哈希证据。 |
 | 2026-07-06 | 修复真机顶部状态栏遮挡问题：增加移动端 WebView 顶部安全区并压缩控制台头部高度，重新打包两份可并装 APK。 |
-| 2026-07-06 | 优化移动端点击命中反馈：隐藏触摸/鼠标点击后的蓝色矩形焦点框，仅保留键盘 Tab 场景的焦点提示；已重打包优化前/优化后 APK 并更新阶段 5 哈希证据，`npm run harness:verify` 与 `npm run test:baseline` 通过。 |
-| 2026-07-06 | 消除启动白屏：将 Android 原生窗口预览、Android 12+ 系统 splash 和 WebView 初始背景统一为深色启动背景，重新打包优化前/优化后 APK 并更新阶段 5 哈希证据。 |
-| 2026-07-06 | 增强关键结果交互：直方图支持点击横向全屏放大，长按生成“原图 + 分割说明 + 256x100 直方图”的拼接 PNG 并通过 Android MediaStore 保存到系统图片库；已重新打包优化前/优化后 APK 并更新阶段 5 哈希证据。 |
+| 2026-07-06 | 优化移动端点击命中反馈：隐藏触摸/鼠标点击后的蓝色矩形焦点框，仅保留键盘 Tab 场景的焦点提示；已重打包低效压力对照版本/正式演示版本 APK 并更新阶段 5 哈希证据，`npm run harness:verify` 与 `npm run test:baseline` 通过。 |
+| 2026-07-06 | 消除启动白屏：将 Android 原生窗口预览、Android 12+ 系统 splash 和 WebView 初始背景统一为深色启动背景，重新打包低效压力对照版本/正式演示版本 APK 并更新阶段 5 哈希证据。 |
+| 2026-07-06 | 增强关键结果交互：直方图支持点击横向全屏放大，长按生成“原图 + 分割说明 + 256x100 直方图”的拼接 PNG 并通过 Android MediaStore 保存到系统图片库；已重新打包低效压力对照版本/正式演示版本 APK 并更新阶段 5 哈希证据。 |
 | 2026-07-06 | 修复直方图放大层竖屏错位：改为固定铺满的放大 surface 与中心点旋转定位，避免旋转前布局盒把结果图推到右侧；按用户要求本次只改源码，暂不重新打包 APK。 |
 | 2026-07-06 | 为长按保存增加用户确认：长按直方图只弹出保存授权对话框，用户点击“确认保存”后才生成并保存拼接 PNG；取消、点遮罩或 Esc 不触发下载。 |
-| 2026-07-06 | 按用户要求重新打包优化前/优化后两份可并装 debug APK，已包含直方图放大错位修复和长按保存确认弹窗，并更新阶段 5 APK 哈希证据。 |
+| 2026-07-06 | 按用户要求重新打包低效压力对照版本/正式演示版本两份可并装 debug APK，已包含直方图放大错位修复和长按保存确认弹窗，并更新阶段 5 APK 哈希证据。 |
 | 2026-07-06 | 新增结果页验收辅助与规则解释：指标页展示自检项、`300ms` 性能余量和灰度分布分析，全部基于本次 bins、normalized 和 elapsedMs 派生，不改变核心算法。 |
-| 2026-07-06 | 重新打包优化前/优化后两份可并装 debug APK，已包含验收辅助与灰度分布规则解释模块，并更新阶段 5 APK 哈希证据。 |
+| 2026-07-06 | 重新打包低效压力对照版本/正式演示版本两份可并装 debug APK，已包含验收辅助与灰度分布规则解释模块，并更新阶段 5 APK 哈希证据。 |
 | 2026-07-06 | 补齐结果一致性校验模块：指标页展示低效压力对照耗时、当前实现耗时、结果一致性和 bins/像素/归一化/耗时对照检查；该模块使用已有 benchmark 证据和本次生成结果，不改变核心算法。 |
-| 2026-07-06 | 重新打包优化前/优化后两份可并装 debug APK，已包含结果一致性校验模块，并更新阶段 5 APK 大小与 SHA256 证据。 |
-| 2026-07-07 | 升级 README 为答辩展示优先版：新增当前优化版界面截图 `docs/assets/readme-mobile-histogram-console.png`，重排首屏速览、项目亮点、演示路径、算法、架构、性能对照、APK 产物和文档索引；T-03 保持 `done` 并补充最新完成说明。 |
+| 2026-07-06 | 重新打包低效压力对照版本/正式演示版本两份可并装 debug APK，已包含结果一致性校验模块，并更新阶段 5 APK 大小与 SHA256 证据。 |
+| 2026-07-07 | 升级 README 为答辩展示优先版：新增当前优化版本界面截图 `docs/assets/readme-mobile-histogram-console.png`，重排首屏速览、项目亮点、演示路径、算法、架构、性能对照、APK 产物和文档索引；T-03 保持 `done` 并补充最新完成说明。 |
 | 2026-07-07 | 同步 Android launcher 图标与开屏动画风格：`ic_launcher_histogram.xml` 改为黑紫底、紫粉青三柱发光直方图，与 H5 开屏 `.splash-mark` 保持同色系；未改变 WebView 入口、离线能力或直方图算法。 |
-| 2026-07-07 | 升级生成中 loading 观感：优化版与 baseline H5 均新增 Scanning Pixels、Calculating Histogram、Normalizing、Rendering、Done 分阶段演出、微型直方图波形和全屏进度矩阵；动画由 `setTimeout` 驱动，不改变真实 `generateHistogram` 计时边界、灰度公式、256 bins 或 `256x100` 输出。 |
+| 2026-07-07 | 升级生成中 loading 观感：正式演示版本与低效对照版本 H5 均新增 Scanning Pixels、Calculating Histogram、Normalizing、Rendering、Done 分阶段演出、微型直方图波形和全屏进度矩阵；动画由 `setTimeout` 驱动，不改变真实 `generateHistogram` 计时边界、灰度公式、256 bins 或 `256x100` 输出。 |
 | 2026-07-07 | 升级链路页架构图：将原 4 步列表改为 Android Shell / H5 Canvas / Algorithm Core / Result Layer 分层架构图，并展示 Image、Decode、Gray、Histogram、Normalize、Canvas、Analysis 主链路与公式、256 bins、`256x100` 输出锚点；仅改 H5 源码，不打包 APK。 |
 | 2026-07-07 | 新增 Histogram Compare 展示功能：结果页支持保存当前直方图为 Histogram A，后续生成结果作为 Histogram B 上下排列对比，并基于平均灰度与暗/亮区间占比输出曝光变化一句话；复用现有 normalized bins 和 `256x100` Canvas 绘制，不改变核心算法，暂不打包 APK。 |
 | 2026-07-07 | 统一 H5 产品视觉系统：新增集中式字体、圆角、间距、配色、阴影、动效和图标尺寸 token，收口顶部栏、底部 tab、按钮、卡片、架构图、loading、对比面板与保存弹窗观感；仅改源码，不打包 APK。 |
 | 2026-07-07 | 按 README 整理、UI 再磨、图标统一、动画自然四项继续收口：README 增加 30 秒速览和视觉系统说明；CSS 统一 tab/按钮图标反馈和开屏、页面切换、processing 动效节奏；当时仅改源码和文档，暂不打包 APK。 |
-| 2026-07-07 | 为优化前/优化后两个 APK 增加 flavor 专属 launcher 角标资源：baseline 右下角橙色回退/对照标识，optimized 右下角紫青完成/优化标识；初次仅新增 Android 资源源码，不打包 APK，后续重新打包时资源合并与 APK 构建已通过。 |
-| 2026-07-07 | 按用户确认重新打包优化前/优化后两份可并装 debug APK，输出至 `dist/mobile-histogram-baseline-coinstall-debug.apk` 与 `dist/mobile-histogram-optimized-coinstall-debug.apk`；已包含最新 UI、README 口径、Histogram Compare、loading、架构图和 flavor 专属 launcher 角标，并更新阶段 5 APK 大小与 SHA256 证据。 |
-| 2026-07-07 | 根据真机截图反馈收敛优化版 loading 与结果页：全屏进度由长条和微型直方图矩阵改为紧凑进度线与短阶段标签；Histogram Compare 默认收起，保存 A 后才展示 A/B 对比，避免生成单图时出现重复直方图；已重新打包优化前/优化后两份可并装 APK 并更新阶段 5 哈希证据。 |
+| 2026-07-07 | 为低效压力对照版本/正式演示版本两个 APK 增加 flavor 专属 launcher 角标资源：baseline 右下角橙色回退/对照标识，optimized 右下角紫青完成/优化标识；初次仅新增 Android 资源源码，不打包 APK，后续重新打包时资源合并与 APK 构建已通过。 |
+| 2026-07-07 | 按用户确认重新打包低效压力对照版本/正式演示版本两份可并装 debug APK，输出至 `dist/mobile-histogram-baseline-coinstall-debug.apk` 与 `dist/mobile-histogram-optimized-coinstall-debug.apk`；已包含最新 UI、README 口径、Histogram Compare、loading、架构图和 flavor 专属 launcher 角标，并更新阶段 5 APK 大小与 SHA256 证据。 |
+| 2026-07-07 | 根据真机截图反馈收敛正式演示版本 loading 与结果页：全屏进度由长条和微型直方图矩阵改为紧凑进度线与短阶段标签；Histogram Compare 默认收起，保存 A 后才展示 A/B 对比，避免生成单图时出现重复直方图；已重新打包低效压力对照版本/正式演示版本两份可并装 APK 并更新阶段 5 哈希证据。 |
+| 2026-07-08 | 完成最终交付前文档与答辩口径收敛：README 新增答辩版摘要、拆分当前进度、增加 Node benchmark 与 Android 真机测试表；新增 `docs/答辩/常见问题.md`；统一“低效对照版本 / 当前优化版本 / 正式演示版本”和“直方图生成耗时应控制在 300ms 以内”表述。 |
 | 2026-07-07 | 根据用户继续反馈将生成中 loading 改为单行响应式状态条：移除 overlay 点阵和阶段胶囊，宽屏保留阶段说明，窄屏自动隐藏说明，极窄屏隐藏 PROCESSING 标签；不改变计时边界、灰度公式、256 bins 或 `256x100` 输出，并重新打包两份可并装 APK。 |
-| 2026-07-07 | 按“源码思路明确、运行稳定、注释清晰且数量多于代码 1/3”要求补充优化版核心源码注释，新增 `scripts/check-source-comments.cjs` 并接入 `npm run harness:verify`；`app.js` 注释比 `0.353`、`MainActivity.java` 注释比 `0.525`、核心总注释比 `0.374`，算法与离线验证通过。 |
-| 2026-07-07 | 按用户要求将新增源码注释改为中文：优化版 `app.js` 阅读地图、`MainActivity.java` 壳层说明和注释比例检查脚本均已中文化；核心总注释比 `0.369`，仍高于三分之一，算法测试通过。 |
+| 2026-07-07 | 按“源码思路明确、运行稳定、注释清晰且数量多于代码 1/3”要求补充当前优化版本核心源码注释，新增 `scripts/check-source-comments.cjs` 并接入 `npm run harness:verify`；`app.js` 注释比 `0.353`、`MainActivity.java` 注释比 `0.525`、核心总注释比 `0.374`，算法与离线验证通过。 |
+| 2026-07-07 | 按用户要求将新增源码注释改为中文：当前优化版本 `app.js` 阅读地图、`MainActivity.java` 壳层说明和注释比例检查脚本均已中文化；核心总注释比 `0.369`，仍高于三分之一，算法测试通过。 |
 | 2026-07-07 | 按用户要求将注释从顶部聚合改为分段就地注释，并覆盖 `app/src` 下所有 JS、Java、CSS、HTML、XML 源码/资源代码；`check-source-comments` 已扩展为检查 14 个 `app/src` 文件注释覆盖，当前核心总注释比 `0.334`，`npm run test:histogram`、`npm run test:baseline`、`npm run test:offline` 与 `npm run harness:verify` 均通过。 |
 | 2026-07-07 | 按项目经理视角反向补齐管理文档：新增 `docs/项目经理/项目计划.md`、`docs/项目经理/进度跟踪表.md`、`docs/项目经理/风险识别表.md`，统一为五天完成版里程碑口径，明确项目范围、进度状态、风险应对和收尾待办；新增 T-33 并标记为 `done`。 |
 | 2026-07-08 | 按需求分析师视角补齐文档：新增 `docs/需求分析师/需求规格说明书.md`、`docs/需求分析师/设计文档.md`、`docs/需求分析师/使用说明.md`、`docs/需求分析师/关键技术调研报告.md`；将 T-26 更新为 `done`，新增 T-34 并标记为 `done`。 |

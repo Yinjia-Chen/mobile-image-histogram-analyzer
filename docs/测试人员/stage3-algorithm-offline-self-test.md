@@ -66,7 +66,7 @@ assets/app.js
 截图文件：
 
 ```text
-docs/测试/stage3-local-h5-load.png
+docs/测试人员/stage3-local-h5-load.png
 ```
 
 截图显示内容包括：
