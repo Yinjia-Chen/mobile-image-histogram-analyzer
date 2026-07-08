@@ -2,7 +2,9 @@
 
 ## 1. 设计目标
 
-本文档面向研发实现，说明移动端图像直方图分析系统第一阶段的技术方案。第一阶段只关注主流程功能闭环：
+本文档面向研发实现，说明移动端图像直方图分析系统的技术方案和当前实现口径。项目采用 Android WebView 壳 App + H5 Canvas，本地完成图片选择、像素读取、灰度直方图统计、`256x100` 绘制、耗时展示和性能对照。
+
+项目主流程如下：
 
 ```text
 启动 APK
@@ -17,7 +19,7 @@
 -> 显示生成耗时
 ```
 
-性能优化不作为本阶段主流程设计内容。当前阶段只保留耗时记录能力，后续再单独整理性能优化方案和测试记录。
+当前仓库已经输出优化前 / 优化后两份可并装 APK。性能优化以同边界 baseline/optimized 对照方式固化，不改变灰度公式、256 bin 统计、`0-100` 归一化或 `256x100` 输出规则。Android 真机耗时、截图和设备信息仍按测试文档要求回填。
 
 ## 2. 技术边界
 
@@ -47,21 +49,27 @@
 │       │   ├── style.css
 │       │   └── app.js
 │       └── AndroidManifest.xml
+├── dist/
+│   ├── mobile-histogram-baseline-coinstall-debug.apk
+│   └── mobile-histogram-optimized-coinstall-debug.apk
 ├── docs/
+│   ├── 项目经理/
+│   ├── 需求分析师/
+│   ├── 测试人员/
+│   ├── 研发人员/
 │   ├── 产物-项目选题报告.md
 │   ├── 产物-需求分析报告.md
-│   ├── 产物-概要设计.md
-│   └── 研发/
-│       └── tech-design.md
+│   └── 产物-概要设计.md
 ├── README.md
 └── package.json
 ```
 
 说明：
 
-- 第一阶段可以直接把 H5 文件放在 `app/src/main/assets/` 中，减少构建链路。
-- 如果后续需要独立调试 H5，可以再增加 `web/` 目录，并在打包前同步到 Android assets。
+- H5 文件直接放在 `app/src/main/assets/` 中，减少构建链路，保证 APK 离线运行。
+- 本地浏览器预览通过 `npm run preview` 启动，只用于调试 UI 和截图；正式交付仍以 APK 为准。
 - 当前不引入前端框架，优先使用原生 HTML、CSS、JavaScript 和 Canvas。
+- Android product flavors 区分 baseline 与 optimized，保证两份 APK 可并装、可对比。
 
 ## 4. Android 壳层设计
 
@@ -228,10 +236,10 @@ grayBin > 255 -> 255
 
 ### 7.2 统计
 
-统计数组固定为 256 个元素：
+统计数组固定为 256 个元素。当前优化版使用 `Uint32Array(256)`，降低普通数组和对象分配开销：
 
 ```js
-const bins = new Array(256).fill(0);
+const bins = new Uint32Array(256);
 ```
 
 遍历 ImageData：
@@ -259,86 +267,102 @@ normalized[i] = round(bins[i] / maxCount * 100)
 
 ### 7.4 绘制
 
-直方图 Canvas 固定为：
-
-```text
-width = 256
-height = 100
-```
+输出 Canvas 源尺寸固定为 `256x100`。页面可以通过 CSS 放大展示，但源结果不能改变尺寸语义。
 
 绘制规则：
 
-- 先清空画布。
-- 背景使用白色。
-- 每个灰度值对应一个 x 坐标。
-- 每列高度来自 `normalized[x]`。
-- 黑色从底部向上绘制。
+- 先清空直方图 Canvas；
+- 使用白色背景；
+- 每个灰度值对应一列；
+- 黑色柱从底部向上绘制；
+- 柱高来自 `0-100` 归一化结果。
 
-## 8. 耗时记录设计
+## 8. 当前实现收口
 
-第一阶段只记录主流程耗时，不展开性能优化方案。
+### 8.1 Android 实现
 
-建议计时边界：
+| 能力 | 当前实现 |
+| --- | --- |
+| WebView 入口 | `BuildConfig.LOCAL_ENTRY_URL`，由 flavor 决定加载 optimized 或 baseline 页面 |
+| optimized 入口 | `file:///android_asset/index.html` |
+| baseline 入口 | `file:///android_asset/index-baseline.html` |
+| 文件选择 | `WebChromeClient.onShowFileChooser` 转到 Android 系统图片选择器 |
+| 图片保存 | `AndroidHistogramBridge.saveCompositeImage` 接收 H5 PNG base64，通过 MediaStore 保存到系统图片库 |
+| 离线边界 | 核心页面、样式和脚本打包在 APK assets 中，不申请网络权限作为主流程依赖 |
+
+### 8.2 H5 实现
+
+| 模块 | 当前实现 |
+| --- | --- |
+| 页面入口 | `index.html` 为优化版入口，`index-baseline.html` 为低效对照入口 |
+| 主逻辑 | `app.js` 负责图片加载、Canvas 处理、灰度统计、归一化、绘制、指标和日志 |
+| baseline 逻辑 | `baseline-app.js` 使用低效路径构造对照，不作为正式产品入口 |
+| 样式系统 | `style.css` 统一黑紫控制台视觉、移动端 tab、loading、弹窗和结果展示 |
+| 展示结构 | 接入、链路、输出、指标、协议、日志六个视图 |
+| 增强能力 | Histogram Compare、直方图点击放大、长按确认保存拼接图 |
+
+### 8.3 Flavor 与 APK
+
+| Flavor | 包名 | 应用名 | 入口 | 用途 |
+| --- | --- | --- | --- | --- |
+| `baselineDebug` | `com.framia.mobilehistogram.baseline` | `直方图分析-优化前` | `index-baseline.html` | 性能压力对照 |
+| `optimizedDebug` | `com.framia.mobilehistogram.optimized` | `直方图分析-优化后` | `index.html` | 正式演示版本 |
+
+## 9. 性能设计
+
+性能计时边界保持为：
 
 ```text
-draw image to source canvas
--> getImageData
--> grayscale calculation
--> 256-bin counting
--> normalization
--> draw histogram
+Canvas 像素读取
+-> 灰度计算
+-> 256 bin 统计
+-> 0-100 归一化
+-> 256x100 绘制
 ```
 
-计时代码位置：
+当前优化策略：
 
-```text
-start = performance.now()
-执行主流程
-end = performance.now()
-elapsedMs = end - start
+| 策略 | 说明 |
+| --- | --- |
+| TypedArray | 使用 `Uint32Array(256)` 统计灰度值 |
+| 单次遍历 | 一次遍历 RGBA 数据完成灰度计算和 bin 计数 |
+| 固定输出 | 结果绘制固定为 `256x100`，不随原图尺寸扩大 |
+| 对照实现 | baseline 页面保留低效对象分配、重复计算和重复扫描，便于说明优化价值 |
+| 结果一致性 | baseline 与 optimized 必须输出一致 bins、归一化和渲染缓冲区 |
+
+开发机 benchmark 已记录在 `docs/测试人员/stage5-performance-comparison.md`。该数据用于说明实现策略差异，不替代 Android 真机测试。
+
+## 10. 验证命令
+
+研发提交前至少执行：
+
+```bash
+npm run test:histogram
+npm run test:offline
+npm run test:baseline
+npm run benchmark:histogram
+npm run check:source-comments
+npm run harness:verify
 ```
 
-注意：
+如涉及 APK 产物，需要执行 Android 构建并更新 APK 大小、SHA256、包名和入口记录。构建示例：
 
-- 不只记录绘图耗时。
-- 不隐藏像素读取和统计耗时。
-- 后续性能优化文档再讨论对比方式和优化策略。
+```bash
+JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" \
+ANDROID_HOME="/Users/framia/Library/Android/sdk" \
+./gradlew --offline assembleBaselineDebug assembleOptimizedDebug
+```
 
-## 9. 异常处理
+## 11. 已知边界
 
-| 场景 | 处理 |
+| 边界 | 说明 |
 | --- | --- |
-| 用户取消选择 | 保持当前页面状态，提示“未选择图片” |
-| 文件不是图片 | 提示“请选择图片文件” |
-| 图片加载失败 | 提示“图片读取失败，请重新选择” |
-| Canvas 读取失败 | 提示“图像处理失败，请重试” |
-| 图片过大导致耗时较长 | 正常展示结果和耗时，后续在性能记录中说明 |
-
-## 10. 初始验收检查
-
-第一阶段完成后，至少应检查：
-
-| 检查项 | 预期 |
-| --- | --- |
-| APK 可打开 | 能进入 H5 主界面 |
-| 离线可用 | 无网络时页面能加载 |
-| 图片可选择 | 能从手机本地选择图片 |
-| 图片可预览 | 选图后能看到原图 |
-| 公式正确 | 使用指定灰度化公式 |
-| bin 数正确 | 统计数组长度为 256 |
-| 尺寸正确 | 直方图源 Canvas 为 `256x100` |
-| 耗时可见 | 页面展示本次生成耗时 |
-
-## 11. 后续独立文档
-
-以下内容后续单独成文，不写入主流程技术设计：
-
-- 性能优化记录。
-- 不同图片尺寸的耗时测试表。
-- 优化前后对比。
-- 测试计划和测试报告。
-- 使用说明和答辩演示脚本。
+| 真机数据 | 机型、Android 版本、截图和实际耗时仍需测试人员回填 |
+| 图片尺寸 | 超大图片可能受手机性能和 WebView 内存影响，答辩优先使用准备好的中等尺寸图片 |
+| 保存图片 | 长按保存是增强功能，不作为核心验收路径 |
+| baseline | baseline 是压力对照实现，不代表历史生产版本 |
+| 网络 | 核心功能不依赖网络，不能用远程图片作为验收输入 |
 
 ## 12. 小结
 
-本技术设计将系统实现拆分为 Android 壳层和 H5 Canvas 功能层。Android 层负责 APK、WebView 和本地图片选择；H5 层负责主流程图像处理与展示。第一阶段的研发重点是把主流程做稳定、做正确、做可验收，性能优化后续单独推进。
+本技术设计将系统实现拆分为 Android 壳层和 H5 Canvas 功能层。Android 层负责 APK、WebView、本地图片选择和用户确认后的图片保存；H5 层负责主流程图像处理、结果展示、指标说明和性能对照。当前研发重点已经从“搭主流程”转为“稳住交付口径”：不扩范围、不改算法、不伪造性能，确保源码、APK、测试证据和课程文档相互对得上。
