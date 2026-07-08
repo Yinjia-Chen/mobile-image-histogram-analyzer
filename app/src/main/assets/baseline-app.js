@@ -575,7 +575,7 @@
         elements.currentImage,
         elements.histogramCanvas,
         elements.currentResult,
-        "优化前直方图分析"
+        "低效对照直方图分析"
       );
       var dataUrl = outputCanvas.toDataURL("image/png");
       var filename = "histogram-baseline-" + Date.now() + ".png";

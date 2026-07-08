@@ -690,7 +690,7 @@
         elements.currentImage,
         elements.histogramCanvas,
         elements.currentResult,
-        "优化后直方图分析"
+        "正式演示直方图分析"
       );
       var dataUrl = outputCanvas.toDataURL("image/png");
       var filename = "histogram-analysis-" + Date.now() + ".png";

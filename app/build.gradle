@@ -24,7 +24,7 @@ android {
             applicationIdSuffix ".baseline"
             versionNameSuffix "-baseline"
             manifestPlaceholders = [
-                    appLabel: "直方图分析-优化前"
+                    appLabel: "直方图分析-低效对照"
             ]
             buildConfigField "String", "LOCAL_ENTRY_URL", "\"file:///android_asset/index-baseline.html\""
         }
@@ -34,7 +34,7 @@ android {
             applicationIdSuffix ".optimized"
             versionNameSuffix "-optimized"
             manifestPlaceholders = [
-                    appLabel: "直方图分析-优化后"
+                    appLabel: "直方图分析-正式演示"
             ]
             buildConfigField "String", "LOCAL_ENTRY_URL", "\"file:///android_asset/index.html\""
         }

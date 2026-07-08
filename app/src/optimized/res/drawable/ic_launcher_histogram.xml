@@ -74,7 +74,7 @@
         android:fillColor="#FFFFFF"
         android:fillAlpha="0.18"
         android:pathData="M35,16h38c6.2,0 11.8,2.8 15.5,7.2 -4.7,-2.3 -10.1,-3.6 -16.5,-3.6h-37c-6.5,0 -12,1.3 -16.5,3.6 3.7,-4.4 9.3,-7.2 16.5,-7.2z" />
-    <!-- 优化版角标底座：右下角标识当前 APK 是优化后版本。 -->
+    <!-- 当前优化版本角标底座：右下角标识当前 APK 是正式演示版本。 -->
     <path
         android:fillColor="#05050C"
         android:fillAlpha="0.58"

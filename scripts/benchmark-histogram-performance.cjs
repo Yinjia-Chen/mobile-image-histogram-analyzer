@@ -215,9 +215,9 @@ function run() {
   console.log("# Histogram Performance Comparison");
   console.log("");
   console.log("Timing boundary: RGBA pixel read copy -> grayscale calculation -> 256-bin counting -> 0-100 normalization -> 256x100 rendering buffer.");
-  console.log(`The comparison-baseline mode is an intentionally inefficient control implementation, not a historical production version. It repeats per-pixel gray calculation ${BASELINE_REDUNDANT_PIXEL_ROUNDS} times as an anti-pattern stress control.`);
+  console.log(`The low-efficiency control mode is an intentionally inefficient implementation, not a historical production version. It repeats per-pixel gray calculation ${BASELINE_REDUNDANT_PIXEL_ROUNDS} times as an anti-pattern stress control.`);
   console.log("");
-  console.log("| Case | Image size | Pixels | Comparison baseline | Current optimized | Speedup | <300ms |");
+  console.log("| Case | Image size | Pixels | Low-efficiency control | Current version | Speedup | <300ms |");
   console.log("| --- | --- | ---: | ---: | ---: | ---: | --- |");
   for (const row of rows) {
     console.log([

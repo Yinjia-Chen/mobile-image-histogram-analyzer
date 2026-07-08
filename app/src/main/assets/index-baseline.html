@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- baseline 启动动画层：用于区分优化前对照 APK 的视觉入口。 -->
+  <!-- baseline 启动动画层：用于区分低效压力对照 APK 的视觉入口。 -->
   <div id="splashScreen" class="splash-screen splash-screen--baseline" aria-label="启动动画">
     <div class="splash-core">
       <div class="splash-mark" aria-hidden="true">
@@ -60,7 +60,7 @@
         </div>
       </div>
       <div class="top-actions">
-        <span class="mode-chip mode-chip--baseline">优化前引擎</span>
+        <span class="mode-chip mode-chip--baseline">低效对照引擎</span>
         <label class="choose-button" for="imageInput">
           <span class="choose-icon" aria-hidden="true"></span>
           <span>接入图像</span>
@@ -127,7 +127,7 @@
     <section id="screen-pipeline" class="app-screen" data-screen>
       <div class="screen-heading">
         <span>NODE 02 / BASELINE PIPELINE</span>
-        <h2>优化前链路拆分</h2>
+        <h2>低效对照链路拆分</h2>
         <p>把对照实验链路从接入页拆出，单页只展示低效路径步骤。</p>
       </div>
 
@@ -165,7 +165,7 @@
     <section id="screen-result" class="app-screen" data-screen>
       <div class="screen-heading screen-heading--compact">
         <span>NODE 03 / BASELINE MATRIX</span>
-        <h2>优化前灰度矩阵输出</h2>
+        <h2>低效对照灰度矩阵输出</h2>
         <p>这里只保留生成进度与同规格直方图，统计项拆到指标页。</p>
       </div>
 
@@ -325,7 +325,7 @@
     <section id="screen-log" class="app-screen" data-screen>
       <div class="screen-heading">
         <span>NODE 06 / BASELINE LOG</span>
-        <h2>优化前处理终端</h2>
+        <h2>低效对照处理终端</h2>
         <p>低效路径的载入、重复灰度计算、对象统计、归一化和渲染节点都会在这里记录。</p>
       </div>
 
